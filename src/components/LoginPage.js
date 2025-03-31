@@ -3,15 +3,15 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { useAuth } from '../context/AuthContext'; // Importar el contexto
 
-// Configuración de Firebase
+// Configuración de Firebase usando variables de entorno o funciones
 const firebaseConfig = {
-  apiKey: "AIzaSyAwF8kzPatb6xXLckVEaAvdLKgbhjVXMsY",
-  authDomain: "fastpass-91ef9.firebaseapp.com",
-  projectId: "fastpass-91ef9",
-  storageBucket: "fastpass-91ef9.appspot.com",
-  messagingSenderId: "798388642518",
-  appId: "1:798388642518:web:065dd5ac82f1f09225df77",
-  measurementId: "G-GFSSKCSFF2"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || window.firebaseConfig.custom.api_key,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || window.firebaseConfig.custom.auth_domain,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || window.firebaseConfig.custom.project_id,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || window.firebaseConfig.custom.storage_bucket,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || window.firebaseConfig.custom.messaging_sender_id,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || window.firebaseConfig.custom.app_id,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || window.firebaseConfig.custom.measurement_id,
 };
 
 // Inicializar Firebase
