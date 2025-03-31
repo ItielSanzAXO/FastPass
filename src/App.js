@@ -1,24 +1,27 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import HomePage from './components/HomePage';
+import EventsPage from './components/EventsPage';
+import ResalePage from './components/ResalePage';
+import LoginPage from './components/LoginPage';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        <nav style={{ padding: '10px', backgroundColor: '#1e9ade', marginBottom: '20px' }}>
+          <Link to="/" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Inicio</Link>
+          <Link to="/login" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Iniciar Sesión</Link>
+          <Link to="/events" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Eventos</Link>
+          <Link to="/resale" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Reventa</Link>
+        </nav>
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+          <Route path="/login" component={LoginPage} />
+          <Route path="/events" component={EventsPage} />
+          <Route path="/resale" component={ResalePage} />
+        </Switch>
+      </div>
+    </Router>
   );
 }
 
