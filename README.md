@@ -25,42 +25,35 @@ FastPass es una plataforma digital para la compra y reventa de boletos para even
 
 ## 📦 Instalación y Configuración
 
-1. **Clona este repositorio:**
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/tu-usuario/fastpass.git
+cd fastpass
+```
 
-    ```bash
-    git clone https://github.com/tu-usuario/fastpass.git
-    ```
+### 2. Instalar dependencias
+```bash
+npm install
+```
 
-2. **Ingresa a la carpeta del proyecto:**
+### 3. Configurar las variables de entorno
+Copia el archivo `.env.example` y renómalo como `.env`:
+```bash
+cp .env.example .env
+```
 
-    ```bash
-    cd fastpass
-    ```
+Luego, completa las variables en el archivo `.env` con las claves de Firebase proporcionadas.
 
-3. **Instala las dependencias necesarias:**
+### 4. Ejecutar el proyecto
+Para desarrollo:
+```bash
+npm start
+```
 
-    ```bash
-    npm install
-    ```
-
-4. **Configura Firebase en el archivo `src/firebaseConfig.js`:**
-
-    ```javascript
-    export const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-    ```
-
-5. **Inicia el servidor de desarrollo:**
-
-    ```bash
-    npm start
-    ```
+Para construir la aplicación para producción:
+```bash
+npm run build
+```
 
 ---
 
@@ -113,4 +106,4 @@ Este proyecto está bajo la licencia **MIT**. Puedes usarlo y modificarlo librem
 
 ## 📧 Contacto
 
-Si tienes dudas o sugerencias, puedes enviarme un mensaje a [tu email o perfil de GitHub].�️ FastPass - Plataforma de Venta y Reventa de Boletos
+Si tienes dudas o sugerencias, puedes enviarme un mensaje a [tu email o perfil de GitHub].
