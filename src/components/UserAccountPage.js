@@ -1,27 +1,32 @@
 import React, { useState, useEffect } from 'react';
 
-function ResalePage() {
+function UserAccountPage() {
+  const [userTickets, setUserTickets] = useState([]);
   const [resaleTickets, setResaleTickets] = useState([]);
 
   useEffect(() => {
-    // Simulación de datos de boletos en reventa desde una base de datos
-    const fetchedResaleTickets = [
+    // Simulación de boletos comprados por el usuario
+    const fetchedUserTickets = [
       { id: 1, event: 'Concierto 1', price: 50 },
       { id: 2, event: 'Concierto 2', price: 75 },
     ];
-    setResaleTickets(fetchedResaleTickets);
+    setUserTickets(fetchedUserTickets);
   }, []);
 
-  const handleBuyTicket = (ticketId) => {
-    alert(`Has comprado el boleto con ID: ${ticketId}`);
-    // Aquí puedes agregar la lógica para procesar la compra
+  const handleSellTicket = (ticketId) => {
+    const ticketToSell = userTickets.find(ticket => ticket.id === ticketId);
+    if (ticketToSell) {
+      setResaleTickets([...resaleTickets, ticketToSell]);
+      setUserTickets(userTickets.filter(ticket => ticket.id !== ticketId));
+      alert(`El boleto para ${ticketToSell.event} se ha puesto en reventa.`);
+    }
   };
 
   return (
     <div style={{ padding: '20px', color: '#1e9ade' }}>
-      <h1>Boletos en Reventa</h1>
+      <h1>Mis Boletos</h1>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
-        {resaleTickets.map(ticket => (
+        {userTickets.map(ticket => (
           <li 
             key={ticket.id} 
             style={{ 
@@ -34,7 +39,7 @@ function ResalePage() {
           >
             {ticket.event} - ${ticket.price}
             <button 
-              onClick={() => handleBuyTicket(ticket.id)} 
+              onClick={() => handleSellTicket(ticket.id)} 
               style={{ 
                 marginLeft: '10px', 
                 padding: '5px 10px', 
@@ -45,7 +50,7 @@ function ResalePage() {
                 cursor: 'pointer' 
               }}
             >
-              Comprar
+              Poner en Reventa
             </button>
           </li>
         ))}
@@ -54,4 +59,4 @@ function ResalePage() {
   );
 }
 
-export default ResalePage;
+export default UserAccountPage;
