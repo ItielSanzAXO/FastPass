@@ -2,6 +2,7 @@ import React from 'react';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { useAuth } from '../context/AuthContext'; // Importar el contexto
+import { useHistory } from 'react-router-dom'; // Importar useHistory para redirección
 
 // Configuración de Firebase usando variables de entorno o funciones
 const firebaseConfig = {
@@ -19,14 +20,19 @@ initializeApp(firebaseConfig);
 
 function LoginPage() {
   const { login } = useAuth();
+  const history = useHistory(); // Hook para redirección
 
   const handleLogin = async () => {
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken; // Obtener el token de acceso
+      localStorage.setItem('googleAccessToken', token); // Guardar el token en localStorage
       login(result.user); // Guardar el usuario en el contexto
       console.log('Usuario autenticado:', result.user);
+      history.push('/account'); // Redirigir a la página de cuenta
     } catch (error) {
       console.error('Error durante la autenticación:', error);
     }

@@ -7,23 +7,16 @@ import LoginPage from './components/LoginPage';
 import UserAccountPage from './components/UserAccountPage';
 
 function Navigation() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth(); // Obtener el estado del usuario
+  const isLoggedIn = !!user; // Verificar si el usuario está autenticado
 
   return (
     <nav style={{ padding: '10px', backgroundColor: '#1e9ade', marginBottom: '20px' }}>
       <Link to="/" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Inicio</Link>
-      {!user ? (
+      {!isLoggedIn ? (
         <Link to="/login" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Iniciar Sesión</Link>
       ) : (
-        <>
-          <Link to="/account" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Mi Cuenta</Link>
-          <button 
-            onClick={logout} 
-            style={{ margin: '0 10px', backgroundColor: 'transparent', border: 'none', color: '#eefbff', cursor: 'pointer' }}
-          >
-            Cerrar Sesión
-          </button>
-        </>
+        <Link to="/account" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Mi Cuenta</Link>
       )}
       <Link to="/events" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Eventos</Link>
       <Link to="/resale" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Reventa</Link>

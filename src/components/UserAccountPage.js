@@ -1,10 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom'; // Importar useHistory para redirección
+import { getAuth, signOut } from 'firebase/auth'; // Importar signOut para cerrar sesión
 
 function UserAccountPage() {
   const [userTickets, setUserTickets] = useState([]);
   const [resaleTickets, setResaleTickets] = useState([]);
+  const [userInfo, setUserInfo] = useState({ name: '', profilePic: '' });
+  const history = useHistory(); // Hook para redirección
 
   useEffect(() => {
+    // Obtener datos del usuario desde la API de Google
+    const fetchGoogleUserInfo = async () => {
+      try {
+        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('googleAccessToken')}`, // Token almacenado tras iniciar sesión
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUserInfo({
+            name: data.name,
+            profilePic: data.picture,
+          });
+        } else {
+          console.error('Error al obtener los datos del usuario:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error al conectar con la API de Google:', error);
+      }
+    };
+
+    fetchGoogleUserInfo();
+
     // Simulación de boletos comprados por el usuario
     const fetchedUserTickets = [
       { id: 1, event: 'Concierto 1', price: 50 },
@@ -22,8 +50,35 @@ function UserAccountPage() {
     }
   };
 
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth); // Cerrar sesión en Firebase
+      localStorage.removeItem('googleAccessToken'); // Eliminar el token de acceso
+      history.push('/login'); // Redirigir a la página de inicio de sesión
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   return (
     <div style={{ padding: '20px', color: '#1e9ade' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img 
+            src={userInfo.profilePic} 
+            alt="Foto de perfil" 
+            style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '10px' }} 
+          />
+          <h2>Bienvenido, {userInfo.name}</h2>
+        </div>
+        <button 
+          onClick={handleLogout} 
+          style={{ padding: '10px 20px', backgroundColor: '#d9534f', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+        >
+          Cerrar Sesión
+        </button>
+      </div>
       <h1>Mis Boletos</h1>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
         {userTickets.map(ticket => (
