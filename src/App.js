@@ -8,7 +8,7 @@ import UserAccountPage from './components/UserAccountPage';
 
 function Navigation() {
   const { user } = useAuth(); // Obtener el estado del usuario
-  const isLoggedIn = !!user; // Verificar si el usuario está autenticado
+  const isLoggedIn = !!user; // Verificar si el usuario está autenticado con Gooogle
 
   return (
     <nav style={{ padding: '10px', backgroundColor: '#1e9ade', marginBottom: '20px' }}>
