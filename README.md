@@ -4,6 +4,56 @@ FastPass es una plataforma digital para la compra y reventa de boletos para even
 
 ---
 
+## 🚀 Desplegar en Firebase Hosting
+
+Sigue estos pasos para desplegar tu aplicación en Firebase Hosting:
+
+### 1. Instalar Firebase CLI
+Si no tienes Firebase CLI instalado, hazlo globalmente con:
+```bash
+npm install -g firebase-tools
+```
+
+### 2. Iniciar sesión en Firebase
+Abre la terminal e inicia sesión:
+```bash
+firebase login
+```
+
+### 3. Configurar Firebase Hosting
+Inicializa Firebase Hosting en tu proyecto:
+```bash
+firebase init hosting
+```
+- Selecciona tu proyecto de Firebase.
+- Define `build` como el directorio público.
+- Responde "No" cuando se te pregunte si es una SPA (React Router manejará el enrutamiento).
+
+### 4. Construir la aplicación
+Genera los archivos optimizados para producción:
+```bash
+npm run build
+```
+
+### 5. Desplegar la aplicación
+Sube tu aplicación a Firebase Hosting:
+```bash
+firebase deploy
+```
+
+Tu aplicación estará disponible en la URL proporcionada por Firebase Hosting. 🎉
+
+### 6. Construir la aplicación en el host de Firebase
+Si deseas construir la aplicación directamente en el host de Firebase, puedes usar el siguiente comando después de haber configurado Firebase Hosting:
+
+```bash
+firebase build
+```
+
+Esto generará los archivos optimizados para producción y los colocará en el directorio configurado como público (`build` por defecto).
+
+---
+
 ## 🚀 Características Principales
 
 - 🔑 **Inicio de sesión con Google**
@@ -18,7 +68,7 @@ FastPass es una plataforma digital para la compra y reventa de boletos para even
 
 - **Frontend:** React.js con React Router
 - **Autenticación:** Firebase Authentication
-- **Base de Datos:** Azure (simulada por ahora)
+- **Base de Datos:** Firebase (simulada por ahora)
 - **Estado Global:** Context API (o Redux en el futuro)
 
 ---
@@ -43,6 +93,21 @@ cp .env.example .env
 ```
 
 Luego, completa las variables en el archivo `.env` con las claves de Firebase proporcionadas.
+
+**Nota:** Si Firebase genera un archivo de configuración `firebaseConfig`, asegúrate de colocarlo en `src/firebaseConfig.js` y exportarlo como un objeto. Por ejemplo:
+```javascript
+// src/firebaseConfig.js
+const firebaseConfig = {
+  apiKey: "tu-api-key",
+  authDomain: "tu-auth-domain",
+  projectId: "tu-project-id",
+  storageBucket: "tu-storage-bucket",
+  messagingSenderId: "tu-messaging-sender-id",
+  appId: "tu-app-id"
+};
+
+export default firebaseConfig;
+```
 
 ### 4. Ejecutar el proyecto
 Para desarrollo:
