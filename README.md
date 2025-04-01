@@ -76,9 +76,15 @@ Esto generará los archivos optimizados para producción y los colocará en el d
 ## 📦 Instalación y Configuración
 
 ### 1. Clonar el repositorio
+Si no tienes el repositorio, clónalo con:
 ```bash
 git clone https://github.com/ItielSanzAXO/fastpass.git
 cd fastpass
+```
+
+Si ya tienes el repositorio, actualízalo con:
+```bash
+git pull origin main
 ```
 
 ### 2. Instalar dependencias
