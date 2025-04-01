@@ -77,7 +77,7 @@ Esto generará los archivos optimizados para producción y los colocará en el d
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/tu-usuario/fastpass.git
+git clone https://github.com/ItielSanzAXO/fastpass.git
 cd fastpass
 ```
 
