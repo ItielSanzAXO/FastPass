@@ -1,7 +1,7 @@
 .navigation-container {
   font-family: 'Disket Mono', monospace;
-  background-color: #282c34;
-  color: white;
+  background-color: #393ce593; /* Cambiar color principal */
+  color: #006bff; /* Cambiar color secundario */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -11,12 +11,15 @@
 }
 
 .navigation-logo {
-  font-size: 1.8rem;
-  font-weight: bold;
+  font-family: 'Disket Mono', monospace;
+  color: #61dafb; /* Cambiar color terciario */
+  font-size: 1.5rem;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
 .navigation-title {
-  color: #ffcc00;
+  color: #006bbf; /* Cambiar color secundario */
   text-decoration: none;
   transition: color 0.3s;
 }
@@ -79,7 +82,7 @@
     flex-direction: column; /* Mostrar los enlaces en una columna */
     gap: 10px; /* Reducir el espacio entre los enlaces */
     width: 250px; /* Ajustar el ancho del menú desplegable */
-    background-color: #003366; /* Fondo del menú desplegable */
+    background-color: #393ce5; /* Cambiar color principal */
     padding: 20px; /* Ajustar el padding */
     position: fixed; /* Fijar el menú en la pantalla */
     top: 0; /* Ajustar al inicio de la pantalla */
@@ -95,7 +98,7 @@
 
   .navigation-link {
     font-size: 1rem; /* Reducir el tamaño del texto */
-    color: #ffcc00;
+    color: #fff; /* Cambiar color secundario */
     text-align: left;
   }
 }

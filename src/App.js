@@ -8,6 +8,7 @@ import UserAccountPage from './components/UserAccountPage';
 import Footer from './components/Footer'; // Importar el Footer
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
+import logo from './assets/FastPassBG.png'; // Importar el logo
 
 function Navigation() {
   const { user } = useAuth(); // Obtener el estado del usuario
@@ -25,7 +26,19 @@ function Navigation() {
   return (
     <nav className="navigation-container">
       <div className="navigation-logo">
-        <Link to="/" className="navigation-title">FastPass</Link>
+        <Link to="/" className="navigation-title">
+          <img 
+            src={logo} 
+            alt="Logo" 
+            className="logo" 
+            style={{ 
+              width: '65px', 
+              height: 'auto', 
+              paddingLeft: '10px', 
+              borderRadius: '10px' // Aplicar border-radius a toda la imagen
+            }} 
+          />
+        </Link>
       </div>
       <button className="hamburger-button" onClick={toggleMenu}>
         {menuOpen ? '✖' : '☰'} {/* Cambiar entre abrir y cerrar */}
