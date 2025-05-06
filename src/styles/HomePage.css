@@ -9,14 +9,14 @@ body, html {
     font-family: 'Roboto', sans-serif;
     background-color: #f9f9f9;
     margin: 0;
-    padding: 0;
     width: 100%; /* Asegurar que el contenedor no exceda el ancho */
+    padding: 0 !important; /* Forzar la eliminación del padding */
 }
 
 .homepage-header {
     background-color: #003366;
     color: #fff;
-    padding: 20px 0;
+    padding: 0;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -39,9 +39,13 @@ body, html {
     color: #fff;
 }
 
+/* Ajustar márgenes y evitar desbordamientos */
 .homepage-carousel {
-    margin-bottom: 50px;
-    width: 100%; /* Asegurar que el carrusel ocupe el ancho completo */
+    margin-top: 0; /* Eliminar margen superior */
+    margin-right: 0; /* Eliminar margen derecho */
+    margin-left: 0; /* Asegurar que no haya margen izquierdo */
+    padding: 0; /* Eliminar cualquier padding */
+    width: 100%; /* Asegurar que ocupe el ancho completo */
     overflow: hidden; /* Evitar desbordamiento */
 }
 

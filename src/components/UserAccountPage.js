@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom'; // Importar useHistory para redirección
 import { getAuth, signOut } from 'firebase/auth'; // Importar signOut para cerrar sesión
 
+const globalStyles = {
+  fontFamily: 'Disket Mono, monospace',
+  color: '#1e9ade',
+};
+
 function UserAccountPage() {
   const [userTickets, setUserTickets] = useState([]);
   const [resaleTickets, setResaleTickets] = useState([]);
@@ -9,12 +14,20 @@ function UserAccountPage() {
   const history = useHistory(); // Hook para redirección
 
   useEffect(() => {
+    // Verificar si el token de acceso está disponible
+    const token = localStorage.getItem('googleAccessToken');
+    if (!token) {
+      console.error('No se encontró el token de acceso. Redirigiendo a la página de inicio de sesión.');
+      history.push('/login'); // Redirigir si no hay token
+      return;
+    }
+
     // Obtener datos del usuario desde la API de Google
     const fetchGoogleUserInfo = async () => {
       try {
         const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('googleAccessToken')}`, // Token almacenado tras iniciar sesión
+            Authorization: `Bearer ${token}`, // Token almacenado tras iniciar sesión
           },
         });
         if (response.ok) {
@@ -25,9 +38,11 @@ function UserAccountPage() {
           });
         } else {
           console.error('Error al obtener los datos del usuario:', response.statusText);
+          history.push('/login'); // Redirigir si hay un error
         }
       } catch (error) {
         console.error('Error al conectar con la API de Google:', error);
+        history.push('/login'); // Redirigir si hay un error
       }
     };
 
@@ -39,7 +54,7 @@ function UserAccountPage() {
       { id: 2, event: 'Concierto 2', price: 75 },
     ];
     setUserTickets(fetchedUserTickets);
-  }, []);
+  }, [history]);
 
   const handleSellTicket = (ticketId) => {
     const ticketToSell = userTickets.find(ticket => ticket.id === ticketId);
@@ -62,7 +77,7 @@ function UserAccountPage() {
   };
 
   return (
-    <div style={{ padding: '20px', color: '#1e9ade' }}>
+    <div style={{ ...globalStyles, padding: '20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <img 

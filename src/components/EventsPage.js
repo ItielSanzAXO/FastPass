@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
+const globalStyles = {
+  fontFamily: 'Disket Mono, monospace',
+  color: '#1e9ade',
+};
+
 function EventsPage() {
   const [events, setEvents] = useState([]);
 
@@ -16,8 +21,9 @@ function EventsPage() {
   }, []);
 
   return (
-    <div style={{ padding: '20px', color: '#1e9ade' }}>
+    <div style={{ ...globalStyles, padding: '20px' }}>
       <h1>Eventos Disponibles</h1>
+      <p>Encuentra los mejores eventos cerca de ti.</p>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
         {events.map(event => (
           <li 

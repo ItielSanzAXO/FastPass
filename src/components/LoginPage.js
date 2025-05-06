@@ -1,5 +1,5 @@
-import React from 'react';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import React, { useEffect } from 'react';
+import { getAuth, signInWithPopup, GoogleAuthProvider, getRedirectResult } from 'firebase/auth'; // Importar getRedirectResult
 import { initializeApp } from 'firebase/app';
 import { useAuth } from '../context/AuthContext'; // Importar el contexto
 import { useHistory } from 'react-router-dom'; // Importar useHistory para redirección
@@ -18,9 +18,35 @@ const firebaseConfig = {
 // Inicializar Firebase
 initializeApp(firebaseConfig);
 
+const globalStyles = {
+  fontFamily: 'Disket Mono, monospace',
+  color: '#1e9ade',
+};
+
 function LoginPage() {
   const { login } = useAuth();
   const history = useHistory(); // Hook para redirección
+
+  useEffect(() => {
+    const auth = getAuth();
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken; // Obtener el token de acceso
+          localStorage.setItem('googleAccessToken', token); // Guardar el token en localStorage
+          login(result.user); // Guardar el usuario en el contexto
+          console.log('Usuario autenticado tras redirección:', result.user);
+          history.push('/account'); // Redirigir a la página de cuenta
+        }
+      } catch (error) {
+        console.error('Error al manejar el resultado de la redirección:', error);
+      }
+    };
+
+    handleRedirectResult();
+  }, [login, history]);
 
   const handleLogin = async () => {
     const auth = getAuth();
@@ -39,7 +65,7 @@ function LoginPage() {
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px', color: '#1e9ade' }}>
+    <div style={{ ...globalStyles, textAlign: 'center', marginTop: '50px' }}>
       <h1>Iniciar Sesión en FastPass</h1>
       <button 
         onClick={handleLogin} 

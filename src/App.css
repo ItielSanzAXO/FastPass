@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Disket Mono';
+  src: url('./assets/fonts/Disket-Mono-Regular.ttf') format('truetype');
+}
+
 .App {
   text-align: center;
 }
@@ -35,4 +40,28 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+body {
+  font-family: 'Disket Mono', monospace;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Disket Mono', monospace;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-family: 'Disket Mono', monospace;
+  margin-bottom: 1rem;
+}
+
+button, input, textarea {
+  font-family: 'Disket Mono', monospace;
 }

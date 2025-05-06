@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
+const globalStyles = {
+  fontFamily: 'Disket Mono, monospace',
+  color: '#1e9ade',
+};
+
 function ResalePage() {
   const [resaleTickets, setResaleTickets] = useState([]);
 
@@ -18,7 +23,7 @@ function ResalePage() {
   };
 
   return (
-    <div style={{ padding: '20px', color: '#1e9ade' }}>
+    <div style={{ ...globalStyles, padding: '20px' }}>
       <h1>Boletos en Reventa</h1>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
         {resaleTickets.map(ticket => (

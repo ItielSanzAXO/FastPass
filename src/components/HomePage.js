@@ -9,6 +9,11 @@ import 'slick-carousel/slick/slick-theme.css';
 import banner1 from '../assets/banner1.png';
 import banner2 from '../assets/banner2.png';
 
+const globalStyles = {
+  fontFamily: 'Disket Mono, monospace',
+  color: '#1e9ade',
+};
+
 function HomePage() {
   const carouselSettings = {
     dots: true,
@@ -21,7 +26,7 @@ function HomePage() {
   };
 
   return (
-    <div className="homepage-container">
+    <div style={{ ...globalStyles, padding: '20px' }} className="homepage-container">
       <section className="homepage-carousel">
         <Slider {...carouselSettings}>
           <div className="carousel-slide">
