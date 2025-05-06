@@ -42,8 +42,8 @@ function HomePage() {
           <div className="carousel-slide">
             <img src={banner2} alt="Shakira en Concierto" />
             <div className="banner-content">
-              <h2>Shakira en Concierto</h2>
-              <p>Estadio Azteca</p>
+              <h2>SERBIA</h2>
+              <p>Auditorio Nacional | Nuevas fechas </p>
               <Link to="/events">
                 <button className="homepage-button primary">Ver Boletos</button>
               </Link>

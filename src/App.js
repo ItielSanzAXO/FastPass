@@ -34,7 +34,8 @@ function Navigation() {
             style={{ 
               width: '65px', 
               height: 'auto', 
-              paddingLeft: '10px', 
+              paddingTop: '5px',
+              paddingLeft: '60px', 
               borderRadius: '10px' // Aplicar border-radius a toda la imagen
             }} 
           />
