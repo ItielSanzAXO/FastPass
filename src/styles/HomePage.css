@@ -1,0 +1,241 @@
+/* Evitar el desbordamiento horizontal en toda la página */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Deshabilitar el desplazamiento horizontal */
+}
+
+.homepage-container {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Asegurar que el contenedor no exceda el ancho */
+}
+
+.homepage-header {
+    background-color: #003366;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.homepage-header h1 {
+    margin: 0;
+    font-size: 2.8rem;
+    letter-spacing: 1.5px;
+}
+
+.homepage-link {
+    color: #ffcc00;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+
+.homepage-link:hover {
+    color: #fff;
+}
+
+.homepage-carousel {
+    margin-bottom: 50px;
+    width: 100%; /* Asegurar que el carrusel ocupe el ancho completo */
+    overflow: hidden; /* Evitar desbordamiento */
+}
+
+.carousel-slide {
+    position: relative;
+    width: 100%;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 500px; /* Ajuste de altura máxima */
+    object-fit: cover; /* Para cubrir el área sin distorsionar */
+}
+
+.slick-dots li button:before {
+    color: #ffcc00; /* Cambiar el color de los puntos del carrusel */
+}
+
+.slick-dots li.slick-active button:before {
+    color: #fff; /* Cambiar el color del punto activo */
+}
+
+.banner-content {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    color: white;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5));
+    padding: 25px 35px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+}
+
+.banner-content h2 {
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.banner-content p {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.homepage-featured {
+    padding: 20px 20px; /* Reducir el padding superior */
+    margin-top: -20px; /* Subir la sección para eliminar el espacio en blanco */
+    text-align: center;
+}
+
+.homepage-featured h2 {
+    font-size: 2.8rem;
+    margin-bottom: 25px; /* Reducir el margen inferior */
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px; /* Aumentar el espacio entre los eventos */
+    padding: 0 20px; /* Añadir padding para evitar que los elementos se desborden */
+    box-sizing: border-box; /* Incluir el padding en el ancho total */
+}
+
+.featured-item {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.featured-item:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.featured-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 3px solid #ffcc00;
+}
+
+.featured-title {
+    margin: 20px 0;
+    font-size: 1.4rem;
+    color: #333;
+    font-weight: bold;
+}
+
+.homepage-footer {
+    background-color: #003366;
+    color: #fff;
+    text-align: center;
+    padding: 30px 0;
+    margin-top: 50px;
+    width: 100%; /* Asegurar que el footer ocupe el ancho completo */
+}
+
+.footer-links {
+    margin-bottom: 15px;
+}
+
+.footer-links a {
+    color: #ffcc00;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1rem;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.homepage-footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.homepage-button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #ffcc00;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.homepage-button.primary {
+    background-color: #ffcc00;
+}
+
+.homepage-button:hover {
+    background-color: #e6b800;
+    transform: scale(1.05);
+}
+
+.homepage-button:active {
+    background-color: #cc9900;
+    transform: scale(0.95);
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+  .banner-content {
+    bottom: 10%;
+    left: 5%;
+    padding: 15px 20px;
+    max-width: 90%;
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .banner-content h2 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .banner-content p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+
+  .homepage-featured h2 {
+    font-size: 2rem; /* Reducir el tamaño del título de "Eventos Destacados" */
+    margin-bottom: 20px;
+  }
+
+  .featured-grid {
+    grid-template-columns: 1fr; /* Mostrar un evento por fila */
+    gap: 20px; /* Reducir el espacio entre los eventos */
+  }
+
+  .featured-item img {
+    height: 150px; /* Reducir la altura de las imágenes */
+  }
+
+  .featured-title {
+    font-size: 1.2rem; /* Reducir el tamaño del texto */
+  }
+
+  .homepage-button {
+    font-size: 0.9rem; /* Reducir el tamaño del botón */
+    padding: 8px 15px; /* Ajustar el padding del botón */
+  }
+}

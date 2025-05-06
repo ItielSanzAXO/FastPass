@@ -1,0 +1,97 @@
+.navigation-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #003366;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Asegurar que el menú ocupe el ancho completo */
+  box-sizing: border-box; /* Incluir el padding en el ancho total */
+}
+
+.navigation-logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.navigation-title {
+  color: #ffcc00;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.navigation-title:hover {
+  color: #fff;
+}
+
+.navigation-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* Permitir que los enlaces se ajusten si es necesario */
+  transition: transform 0.3s ease-in-out;
+}
+
+.navigation-links.open {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.navigation-link {
+  color: #ffcc00;
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: color 0.3s;
+}
+
+.navigation-link:hover {
+  color: #fff;
+}
+
+.hamburger-button {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #ffcc00;
+  cursor: pointer;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+  .navigation-container {
+    flex-direction: row; /* Cambiar la dirección del menú a horizontal */
+    justify-content: space-between; /* Asegurar que los elementos estén separados */
+    align-items: center; /* Alinear los elementos al centro */
+    padding: 10px; /* Reducir el padding */
+  }
+
+  .hamburger-button {
+    display: block; /* Mostrar el botón de hamburguesa en pantallas pequeñas */
+  }
+
+  .navigation-links {
+    display: none; /* Ocultar el menú por defecto */
+    flex-direction: column; /* Mostrar los enlaces en una columna */
+    gap: 10px; /* Reducir el espacio entre los enlaces */
+    width: 250px; /* Ajustar el ancho del menú desplegable */
+    background-color: #003366; /* Fondo del menú desplegable */
+    padding: 20px; /* Ajustar el padding */
+    position: fixed; /* Fijar el menú en la pantalla */
+    top: 0; /* Ajustar al inicio de la pantalla */
+    right: 0; /* Mover el menú al lado derecho */
+    height: 100%; /* Asegurar que ocupe toda la altura */
+    z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5); /* Agregar sombra al menú */
+  }
+
+  .navigation-links.open {
+    display: flex; /* Mostrar el menú cuando esté abierto */
+  }
+
+  .navigation-link {
+    font-size: 1rem; /* Reducir el tamaño del texto */
+    color: #ffcc00;
+    text-align: left;
+  }
+}

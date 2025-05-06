@@ -5,21 +5,40 @@ import EventsPage from './components/EventsPage';
 import ResalePage from './components/ResalePage';
 import LoginPage from './components/LoginPage';
 import UserAccountPage from './components/UserAccountPage';
+import Footer from './components/Footer'; // Importar el Footer
+import './styles/Navigation.css'; // Importar los estilos del menú
+import { useState } from 'react'; // Importar useState para manejar el estado del menú
 
 function Navigation() {
   const { user } = useAuth(); // Obtener el estado del usuario
-  const isLoggedIn = !!user; // Verificar si el usuario está autenticado con Gooogle
+  const isLoggedIn = !!user; // Verificar si el usuario está autenticado con Google
+  const [menuOpen, setMenuOpen] = useState(false); // Estado para manejar el menú
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false); // Cerrar el menú al hacer clic en un enlace
+  };
 
   return (
-    <nav style={{ padding: '10px', backgroundColor: '#1e9ade', marginBottom: '20px' }}>
-      <Link to="/" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Inicio</Link>
-      {!isLoggedIn ? (
-        <Link to="/login" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Iniciar Sesión</Link>
-      ) : (
-        <Link to="/account" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Mi Cuenta</Link>
-      )}
-      <Link to="/events" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Eventos</Link>
-      <Link to="/resale" style={{ margin: '0 10px', color: '#eefbff', textDecoration: 'none' }}>Reventa</Link>
+    <nav className="navigation-container">
+      <div className="navigation-logo">
+        <Link to="/" className="navigation-title">FastPass</Link>
+      </div>
+      <button className="hamburger-button" onClick={toggleMenu}>
+        {menuOpen ? '✖' : '☰'} {/* Cambiar entre abrir y cerrar */}
+      </button>
+      <div className={`navigation-links ${menuOpen ? 'open' : ''}`}>
+        <Link to="/events" className="navigation-link" onClick={closeMenu}>Eventos</Link>
+        <Link to="/resale" className="navigation-link" onClick={closeMenu}>Reventa</Link>
+        {!isLoggedIn ? (
+          <Link to="/login" className="navigation-link" onClick={closeMenu}>Iniciar Sesión</Link>
+        ) : (
+          <Link to="/account" className="navigation-link" onClick={closeMenu}>Mi Cuenta</Link>
+        )}
+      </div>
     </nav>
   );
 }
@@ -37,6 +56,7 @@ function App() {
             <Route path="/resale" component={ResalePage} />
             <Route path="/account" component={UserAccountPage} />
           </Switch>
+          <Footer /> {/* Agregar el Footer aquí */}
         </div>
       </Router>
     </AuthProvider>

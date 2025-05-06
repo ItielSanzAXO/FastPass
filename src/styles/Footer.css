@@ -1,0 +1,46 @@
+.homepage-footer {
+  background-color: #003366;
+  color: #fff;
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 50px;
+  width: 100%; /* Asegurar que el footer ocupe el ancho completo */
+}
+
+.footer-links {
+  margin-bottom: 15px;
+}
+
+.footer-links a {
+  color: #ffcc00;
+  text-decoration: none;
+  margin: 0 15px;
+  font-size: 1rem;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.homepage-footer p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+  .footer-links {
+    display: flex;
+    flex-direction: column; /* Mostrar los enlaces en una columna */
+    gap: 10px; /* Añadir espacio entre los enlaces */
+    margin-bottom: 20px;
+  }
+
+  .footer-links a {
+    font-size: 0.9rem; /* Reducir el tamaño del texto */
+  }
+
+  .homepage-footer p {
+    font-size: 0.8rem; /* Reducir el tamaño del texto */
+  }
+}
