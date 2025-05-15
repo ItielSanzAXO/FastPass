@@ -5,6 +5,14 @@ import '../styles/EventsPage.css'; // Assuming you have a CSS file for additiona
 
 const capitalize = str => str.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
+const formatDate = (date) => {
+  if (date && date.seconds) {
+    const jsDate = new Date(date.seconds * 1000);
+    return jsDate.toLocaleDateString();
+  }
+  return date; // Si ya es un string, devolverlo tal cual
+};
+
 function EventsPage() {
   const [events, setEvents] = useState([]);
 
@@ -30,7 +38,7 @@ function EventsPage() {
           <li className="event-card" key={event.id}>
             <h2 className="event-title">{event.name}</h2>
             <p className="event-venue">{capitalize(event.venueId)}</p>
-            <p className="event-date">{event.date}</p>
+            <p className="event-date">{formatDate(event.date)}</p>
             <Link to={`/event/${event.id}`} className="view-event-link">Ver Evento</Link>
           </li>
         ))}

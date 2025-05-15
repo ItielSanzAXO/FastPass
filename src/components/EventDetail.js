@@ -23,7 +23,8 @@ function EventDetail() {
         const eventRef = doc(db, 'events', eventId);
         const eventSnap = await getDoc(eventRef);
         if (eventSnap.exists()) {
-          setEvent(eventSnap.data());
+          const eventData = eventSnap.data();
+          setEvent({ id: eventId, ...eventData }); // Asegurarse de incluir el ID del evento
         } else {
           console.error('Evento no encontrado');
         }
@@ -45,7 +46,7 @@ function EventDetail() {
     return <p>Evento no encontrado.</p>;
   }
 
-  const VenueComponent = venueComponents[event.venueId];
+  const VenueComponent = venueComponents[event.venueId] || AuditorioITIZ; // Default to AuditorioITIZ
 
   if (!VenueComponent) {
     return <p>Venue no soportado.</p>;
