@@ -1,42 +1,37 @@
 import React, { useState, useEffect } from 'react';
+import { getDocs, collection } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import '../styles/EventsPage.css'; // Assuming you have a CSS file for additional styles
 
-const globalStyles = {
-  fontFamily: 'Disket Mono, monospace',
-  color: '#1e9ade',
-};
+const capitalize = str => str.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
 function EventsPage() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const fetchedEvents = [
-      { id: 1, venue: 'Lugar A', concert: 'Concierto 1' },
-      { id: 2, venue: 'Lugar A', concert: 'Concierto 2' },
-      { id: 3, venue: 'Lugar B', concert: 'Concierto 3' },
-      { id: 4, venue: 'Lugar B', concert: 'Concierto 4' },
-      { id: 5, venue: 'Lugar C', concert: 'Concierto 5' },
-      { id: 6, venue: 'Lugar C', concert: 'Concierto 6' },
-    ];
-    setEvents(fetchedEvents);
+    const fetchEvents = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'events'));
+        const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEvents(fetchedEvents);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    fetchEvents();
   }, []);
 
   return (
-    <div style={{ ...globalStyles, padding: '20px' }}>
+    <div className="events-container">
       <h1>Eventos Disponibles</h1>
       <p>Encuentra los mejores eventos cerca de ti.</p>
-      <ul style={{ listStyleType: 'none', padding: 0 }}>
+      <ul className="events-list">
         {events.map(event => (
-          <li 
-            key={event.id} 
-            style={{ 
-              padding: '10px', 
-              margin: '10px 0', 
-              border: '1px solid #6995bb', 
-              borderRadius: '5px', 
-              backgroundColor: '#eefbff' 
-            }}
-          >
-            {event.venue} - {event.concert}
+          <li className="event-card" key={event.id}>
+            <h2 className="event-title">{event.name}</h2>
+            <p className="event-venue">{capitalize(event.venueId)}</p>
+            <p className="event-date">{event.date}</p>
           </li>
         ))}
       </ul>
