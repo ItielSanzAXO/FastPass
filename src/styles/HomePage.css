@@ -55,10 +55,11 @@ body, html {
 }
 
 .carousel-slide img {
-    width: 100%;
-    height: auto;
+    width: 100%; /* Ajustar al ancho del contenedor */
+    height: 100%; /* Ajustar al alto del contenedor */
+    object-fit: cover; /* Evitar que se deforme o se corte */
     display: block;
-    max-height: 500px; /* Ajuste de altura máxima */
+    max-height: auto; /* Ajuste de altura máxima */
     object-fit: cover; /* Para cubrir el área sin distorsionar */
 }
 
@@ -67,7 +68,7 @@ body, html {
     bottom: 30px;
     left: 30px;
     color: white;
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5));
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.8), rgba(255, 255, 255, 0.5));
     padding: 25px 35px;
     border-radius: 12px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);

@@ -2,11 +2,10 @@
   font-family: 'Disket Mono', monospace;
   background-color: #393ce593; /* Cambiar color principal */
   color: #006bff; /* Cambiar color secundario */
-  display: flex;
+  display: flex; 
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
-  margin: 0; /* Eliminar márgenes */
+  padding: 1px 9px;
   box-sizing: border-box; /* Asegurar que el padding no afecte el ancho */
 }
 
