@@ -1,0 +1,21 @@
+/* Estilos específicos para Duela ITIZ */
+.venue-container {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.stage {
+  background-color: #d84315;
+}
+
+.seat.available {
+  background-color: #4caf50;
+}
+
+.seat.sold {
+  background-color: #f44336;
+}
+
+.seat.selected {
+  background-color: #ff9800;
+}
