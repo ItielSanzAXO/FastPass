@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { getAuth, signInWithPopup, GoogleAuthProvider, getRedirectResult } from 'firebase/auth'; // Importar getRedirectResult
 import { initializeApp } from 'firebase/app';
-import { useAuth } from '../context/AuthContext'; // Importar el contexto
+import { useAuth } from '../context/AuthContext.js'; // Importar el contexto
 import { useHistory } from 'react-router-dom'; // Importar useHistory para redirección
 
 // Configuración de Firebase usando variables de entorno o funciones

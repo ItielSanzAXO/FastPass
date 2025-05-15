@@ -1,11 +1,12 @@
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext'; // Importar el contexto
-import HomePage from './components/HomePage';
-import EventsPage from './components/EventsPage';
-import ResalePage from './components/ResalePage';
-import LoginPage from './components/LoginPage';
-import UserAccountPage from './components/UserAccountPage';
-import Footer from './components/Footer'; // Importar el Footer
+import { AuthProvider, useAuth } from './context/AuthContext.js'; // Importar el contexto
+import HomePage from './components/HomePage.js';
+import EventsPage from './components/EventsPage.js';
+import EventDetail from './components/EventDetail.js'; // Importar EventDetail
+import ResalePage from './components/ResalePage.js';
+import LoginPage from './components/LoginPage.js';
+import UserAccountPage from './components/UserAccountPage.js';
+import Footer from './components/Footer.js'; // Importar el Footer
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
 import logo from './assets/FastPassBG.png'; // Importar el logo
@@ -63,9 +64,10 @@ function App() {
         <div>
           <Navigation />
           <Switch>
-            <Route exact path="/" component={HomePage} />
+            <Route path="/" exact component={HomePage} />
             <Route path="/login" component={LoginPage} />
             <Route path="/events" component={EventsPage} />
+            <Route path="/event/:eventId" component={EventDetail} />
             <Route path="/resale" component={ResalePage} />
             <Route path="/account" component={UserAccountPage} />
           </Switch>

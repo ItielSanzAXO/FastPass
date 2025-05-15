@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getDocs, collection } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { fetchEvents } from '../utils/fetchEvents.js';
+import { Link } from 'react-router-dom';
 import '../styles/EventsPage.css'; // Assuming you have a CSS file for additional styles
 
 const capitalize = str => str.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -9,17 +9,16 @@ function EventsPage() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const loadEvents = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'events'));
-        const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const fetchedEvents = await fetchEvents();
         setEvents(fetchedEvents);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('Error loading events:', error);
       }
     };
 
-    fetchEvents();
+    loadEvents();
   }, []);
 
   return (
@@ -32,6 +31,7 @@ function EventsPage() {
             <h2 className="event-title">{event.name}</h2>
             <p className="event-venue">{capitalize(event.venueId)}</p>
             <p className="event-date">{event.date}</p>
+            <Link to={`/event/${event.id}`} className="view-event-link">Ver Evento</Link>
           </li>
         ))}
       </ul>
