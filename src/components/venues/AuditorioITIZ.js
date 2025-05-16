@@ -38,6 +38,12 @@ function AuditorioITIZ({ event }) {
       <div className="text-center text-gray-600 py-10">
         <h2 className="text-2xl font-semibold mb-4">El evento aún no está disponible para la venta de boletos</h2>
         <p>Por favor, vuelve más tarde.</p>
+        <button
+          className="custom-button"
+          onClick={() => window.location.href = '/'}
+        >
+          Ir al Inicio
+        </button>
       </div>
     );
   }

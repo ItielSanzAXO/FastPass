@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../styles/HomePage.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { fetchEvents } from '../utils/fetchEvents.js';
+import { fetchEvents, getRandomEvents } from '../utils/fetchEvents.js';
 import banner1 from '../assets/banner1.png';
 import banner2 from '../assets/banner2.png';
 import ErrorBoundary from './ErrorBoundary.js';
@@ -16,13 +16,12 @@ const HomePage = () => {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const loadEvents = async () => {
+    const loadRandomEvents = async () => {
       try {
         const fetchedEvents = await fetchEvents();
-        console.log('Fetched events:', fetchedEvents);
-        // Validar que los eventos sean un array antes de establecer el estado
         if (Array.isArray(fetchedEvents)) {
-          setEvents(fetchedEvents);
+          const randomEvents = getRandomEvents(fetchedEvents, 4);
+          setEvents(randomEvents);
         } else {
           console.error('Fetched events is not an array:', fetchedEvents);
         }
@@ -31,7 +30,7 @@ const HomePage = () => {
       }
     };
 
-    loadEvents();
+    loadRandomEvents();
   }, []);
 
   const carouselSettings = {
@@ -76,14 +75,18 @@ const HomePage = () => {
 
         <section className="homepage-featured">
           <h2>Eventos Destacados</h2>
-          <div className="featured-grid">
-            {events.map((event, index) => (
-              <div key={index} className="featured-item">
-                {event.image && <img src={event.image} alt={event.name} />}
-                <p className="featured-title">{event.name}</p>
-              </div>
+          <ul className="events-list single-row">
+            {events.map(event => (
+              <li
+                className="event-card"
+                key={event.id}
+                style={{ backgroundImage: `url(${event.imageUrl})` }}
+              >
+                <h2 className="event-title">{event.name}</h2>
+                <Link to={`/event/${event.id}`} className="view-event-link">Ver Evento</Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
     </ErrorBoundary>
   );

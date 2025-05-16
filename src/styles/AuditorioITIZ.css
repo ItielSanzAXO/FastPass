@@ -238,3 +238,25 @@
 .zones + .second-floor {
   margin-top: 0px; /* Reducir el margen superior */
 }
+
+/* Estilo para el botón personalizado */
+.custom-button {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.custom-button:hover {
+    background-color: #45a049; /* Verde más oscuro */
+}
+
+.custom-button:active {
+    background-color: #3e8e41; /* Verde aún más oscuro */
+}
