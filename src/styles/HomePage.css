@@ -14,9 +14,13 @@ body, html {
 }
 
 .homepage-header {
-    background-color: #393be5; /* Color principal */
+    background-color: rgba(255, 255, 255, 0.486); /* Blanco transparente */
+    position: fixed; /* Mantener fijo */
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Asegurar que esté por encima de otros elementos */
     color: #006bff; /* Color secundario */
-    padding: 0;
+    padding: 10px 20px; /* Añadir padding para mejor apariencia */
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -76,10 +80,11 @@ body, html {
 }
 
 .banner-content h2 {
+    color: white;
     font-size: 2.8rem;
     margin-bottom: 15px;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 2px 2px 4px rgba(3, 3, 3, 0.397);
 }
 
 .banner-content p {

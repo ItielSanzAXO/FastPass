@@ -12,11 +12,6 @@ import Slider from 'react-slick';
 // Ajustar la importación para acceder explícitamente a la propiedad default
 const SliderComponent = Slider.default || Slider;
 
-const globalStyles = {
-  fontFamily: 'Disket Mono, monospace',
-  color: '#1e9ade',
-};
-
 const HomePage = () => {
   const [events, setEvents] = useState([]);
 
@@ -54,7 +49,6 @@ const HomePage = () => {
 
   return (
     <ErrorBoundary>
-      <div style={{ ...globalStyles, padding: '20px' }} className="homepage-container">
         <section className="homepage-carousel">
           <SliderComponent {...carouselSettings}>
             <div className="carousel-slide">
@@ -91,7 +85,6 @@ const HomePage = () => {
             ))}
           </div>
         </section>
-      </div>
     </ErrorBoundary>
   );
 };
