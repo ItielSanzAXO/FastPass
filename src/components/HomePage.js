@@ -58,21 +58,21 @@ const HomePage = () => {
         <section className="homepage-carousel">
           <SliderComponent {...carouselSettings}>
             <div className="carousel-slide">
-              <img src={banner1} alt="El Rey León" />
+              <img src={banner1} alt="Mar Indigo" />
               <div className="banner-content">
-                <h2>El Rey León</h2>
-                <p>Teatro Telcel</p>
-                <Link to="/events">
+                <h2>Mar Indigo</h2>
+                <p>Salón 51</p>
+                <Link to="/event/mar-indigo">
                   <button className="homepage-button primary">Ver Boletos</button>
                 </Link>
               </div>
             </div>
             <div className="carousel-slide">
-              <img src={banner2} alt="Shakira en Concierto" />
+              <img src={banner2} alt="SERBIA" />
               <div className="banner-content">
                 <h2>SERBIA</h2>
                 <p>Auditorio ITIZ</p>
-                <Link to="/events">
+                <Link to="/event/serbia">
                   <button className="homepage-button primary">Ver Boletos</button>
                 </Link>
               </div>
