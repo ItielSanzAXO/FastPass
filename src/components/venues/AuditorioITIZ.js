@@ -67,7 +67,6 @@ function AuditorioITIZ({ event }) {
 
   const renderSecondFloor = () => (
     <div className="second-floor">
-      <div className="zone-label text-center text-blue-700">Zona E (Segundo Piso)</div>
       <div id="zone-e" className="flex flex-col items-center">
         {renderZone('E')}
       </div>
