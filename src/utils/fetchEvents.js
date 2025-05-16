@@ -10,3 +10,9 @@ export const fetchEvents = async () => {
     throw error;
   }
 };
+
+export const getRandomEvents = (events, count) => {
+  if (!Array.isArray(events) || events.length === 0) return [];
+  const shuffled = [...events].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};

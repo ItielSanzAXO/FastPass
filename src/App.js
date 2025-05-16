@@ -10,6 +10,7 @@ import Footer from './components/Footer.js'; // Importar el Footer
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
 import logo from './assets/FastPassBG.png'; // Importar el logo
+import './App.css'; // Importar los estilos de la aplicación
 
 function Navigation() {
   const { user } = useAuth(); // Obtener el estado del usuario
@@ -36,7 +37,6 @@ function Navigation() {
               width: '65px', 
               height: 'auto', 
               paddingTop: '5px',
-              paddingLeft: '60px', 
               borderRadius: '10px' // Aplicar border-radius a toda la imagen
             }} 
           />
@@ -62,17 +62,19 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navigation />
-          <Switch>
-            <Route path="/" exact component={HomePage} />
-            <Route path="/login" component={LoginPage} />
-            <Route path="/events" component={EventsPage} />
-            <Route path="/event/:eventId" component={EventDetail} />
-            <Route path="/resale" component={ResalePage} />
-            <Route path="/account" component={UserAccountPage} />
-          </Switch>
-          <Footer /> {/* Agregar el Footer aquí */}
+          <div style={{ flex: 1 }}>
+            <Switch>
+              <Route path="/" exact component={HomePage} />
+              <Route path="/login" component={LoginPage} />
+              <Route path="/events" component={EventsPage} />
+              <Route path="/event/:eventId" component={EventDetail} />
+              <Route path="/resale" component={ResalePage} />
+              <Route path="/account" component={UserAccountPage} />
+            </Switch>
+          </div>
+          <Footer />
         </div>
       </Router>
     </AuthProvider>

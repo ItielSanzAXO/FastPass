@@ -13,8 +13,11 @@ function formatFirebaseTimestamp(timestamp) {
 function AuditorioITIZ({ event }) {
   const [tickets, setTickets] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const ticketLimit = event.ticketLimitPerUser || 3; // Límite de boletos por usuario
 
   useEffect(() => {
+    if (!event.date) return; // Si no hay fecha, no realizar ninguna acción
+
     const fetchTickets = async () => {
       try {
         const ticketsRef = collection(db, 'tickets');
@@ -28,14 +31,29 @@ function AuditorioITIZ({ event }) {
     };
 
     fetchTickets();
-  }, [event.id]);
+  }, [event.id, event.date]);
+
+  if (!event.date) {
+    return (
+      <div className="text-center text-gray-600 py-10">
+        <h2 className="text-2xl font-semibold mb-4">El evento aún no está disponible para la venta de boletos</h2>
+        <p>Por favor, vuelve más tarde.</p>
+        <button
+          className="custom-button"
+          onClick={() => window.location.href = '/'}
+        >
+          Ir al Inicio
+        </button>
+      </div>
+    );
+  }
 
   const toggleSeatSelection = (seatId) => {
-    setSelectedSeats((prevSelected) =>
-      prevSelected.includes(seatId)
-        ? prevSelected.filter((id) => id !== seatId)
-        : [...prevSelected, seatId]
-    );
+    if (selectedSeats.includes(seatId)) {
+      setSelectedSeats((prevSelected) => prevSelected.filter((id) => id !== seatId));
+    } else if (selectedSeats.length < ticketLimit) {
+      setSelectedSeats((prevSelected) => [...prevSelected, seatId]);
+    }
   };
 
   const renderZone = (zone) => {
@@ -102,6 +120,7 @@ function AuditorioITIZ({ event }) {
             <ul className="text-sm text-gray-600">
               <li className="mb-1">VIP (Primeras 4 filas A, B, C): ${event.ticketPricing?.VIP || 'N/A'}</li>
               <li>General (Resto de zonas): ${event.ticketPricing?.General || 'N/A'}</li>
+              <li>Limite de boletos: {event.ticketLimitPerUser} por usuario</li>
             </ul>
           </div>
         </div>

@@ -1,0 +1,115 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.layout {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.zones {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stage {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.stageArea {
+  width: 250px;
+  height: 50px;
+  background-color: #ff9800;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.stageText {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.zone {
+  width: 250px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #00bce5;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+.general {
+  background-color: #00bcd4;
+}
+
+.active {
+  border-color: #ff9800;
+  box-shadow: 0 0 10px #ff9800;
+}
+
+.sidePanel {
+  flex: 1;
+  margin-left: 20px;
+}
+
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.eventName {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.divider {
+  margin: 20px 0;
+}
+
+.priceList {
+  list-style: none;
+  padding: 0;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 120px;
+  margin: 10px 0;
+}
+
+.limit {
+  font-size: 14px;
+  color: #666;
+}
+
+.buyButton {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.buyButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

@@ -8,6 +8,10 @@ body {
   padding: 0;
 }
 
+html, body {
+  height: 100%;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Disket Mono', monospace;
   color: #222;
@@ -30,8 +34,15 @@ button, input, textarea {
 }
 
 /* App Styles */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .App {
   text-align: center;
+  flex: 1;
 }
 
 .App-logo {
@@ -47,18 +58,26 @@ button, input, textarea {
 }
 
 .App-header {
-  background-color: #393be5; /* Cambiar color principal */
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: #006bff; /* Cambiar color secundario */
+    background-color: rgba(255, 255, 255, 0.486); /* Blanco transparente */
+    position: fixed; /* Mantener fijo */
+    top: 5px;
+    width: 100%;
+    z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+    color: #006bff; /* Color secundario */
+    padding: 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .App-link {
   color: #61dafb;
+}
+
+footer {
+  background-color: #222;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
 }
 
 /* Animations */
