@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../../styles/DuelaITIZ.module.css';
 import { format } from 'date-fns';
+import { useAuth } from '../../context/AuthContext.js';
 
 function formatFirebaseTimestamp(timestamp) {
   if (!timestamp || !timestamp.seconds) return null;
@@ -9,6 +10,7 @@ function formatFirebaseTimestamp(timestamp) {
 }
 
 const DuelaITIZ = ({ event }) => {
+  const { user } = useAuth();
   const [ticketCount, setTicketCount] = useState(0);
   const [selectedZone, setSelectedZone] = useState(null);
   const ticketLimit = event.ticketLimitPerUser || 3;
@@ -89,9 +91,13 @@ const DuelaITIZ = ({ event }) => {
             <p className={styles.limit}>Máximo permitido: {ticketLimit} boletos</p>
             <button
               className={styles.buyButton}
-              disabled={ticketCount === 0 || !selectedZone}
+              disabled={ticketCount === 0 || !selectedZone || !user}
             >
-              {selectedZone ? `Comprar boletos ${selectedZone}` : 'Selecciona una zona'}
+              {user
+                ? selectedZone
+                  ? `Comprar boletos ${selectedZone}`
+                  : 'Selecciona una zona'
+                : 'Inicia sesión para comprar boletos'}
             </button>
           </div>
         </div>

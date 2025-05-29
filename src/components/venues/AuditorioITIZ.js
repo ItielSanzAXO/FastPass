@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../../firebaseConfig.js';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, doc, arrayUnion, writeBatch, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { format } from 'date-fns';
 import '../../styles/AuditorioITIZ.css';
+import { useAuth } from '../../context/AuthContext.js';
+import PaymentPopup from './PaymentPopup.js';
 
 function formatFirebaseTimestamp(timestamp) {
   if (!timestamp || !timestamp.seconds) return null;
@@ -11,26 +13,24 @@ function formatFirebaseTimestamp(timestamp) {
 }
 
 function AuditorioITIZ({ event }) {
+  const { user } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
   const ticketLimit = event.ticketLimitPerUser || 3; // Límite de boletos por usuario
 
   useEffect(() => {
-    if (!event.date) return; // Si no hay fecha, no realizar ninguna acción
+    if (!event.date) return;
 
-    const fetchTickets = async () => {
-      try {
-        const ticketsRef = collection(db, 'tickets');
-        const q = query(ticketsRef, where('eventId', '==', event.id));
-        const querySnapshot = await getDocs(q);
-        const fetchedTickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTickets(fetchedTickets);
-      } catch (error) {
-        console.error('Error fetching tickets:', error);
-      }
-    };
+    const ticketsRef = collection(db, 'tickets');
+    const q = query(ticketsRef, where('eventId', '==', event.id));
 
-    fetchTickets();
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const updatedTickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTickets(updatedTickets);
+    });
+
+    return () => unsubscribe(); // Limpiar el listener al desmontar
   }, [event.id, event.date]);
 
   if (!event.date) {
@@ -56,6 +56,80 @@ function AuditorioITIZ({ event }) {
     }
   };
 
+  const handlePurchase = () => {
+    setShowPopup(true);
+  };
+
+  const confirmPurchase = async () => {
+    if (!selectedSeats.length) {
+      alert('No has seleccionado ningún asiento.');
+      return;
+    }
+
+    if (!user?.uid) {
+      alert('Debes iniciar sesión para realizar una compra.');
+      return;
+    }
+
+    try {
+      // Verificar si el documento del usuario existe
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        // Crear el documento del usuario si no existe
+        await setDoc(userRef, { tickets: [] });
+      }
+
+      // Validar que todos los IDs en selectedSeats existen en tickets
+      const validSeats = selectedSeats.every(seatId => tickets.some(ticket => ticket.id === seatId));
+      if (!validSeats) {
+        alert('Uno o más boletos seleccionados no existen o ya no están disponibles.');
+        return;
+      }
+
+      const batch = writeBatch(db);
+
+      selectedSeats.forEach((seatId) => {
+        const ticketRef = doc(db, 'tickets', seatId);
+        batch.update(ticketRef, {
+          isAvailable: false,
+          ownerUid: user.uid,
+        });
+      });
+
+      batch.update(userRef, {
+        tickets: arrayUnion(...selectedSeats),
+      });
+
+      await batch.commit();
+
+      // Actualizar el estado local
+      const updatedTickets = tickets.map(ticket => {
+        if (selectedSeats.includes(ticket.id)) {
+          return { ...ticket, isAvailable: false, ownerUid: user.uid };
+        }
+        return ticket;
+      });
+
+      setTickets(updatedTickets);
+      setSelectedSeats([]);
+      setShowPopup(false);
+
+      alert('Compra realizada con éxito.');
+    } catch (error) {
+      console.error('Error al procesar la compra:', error);
+
+      if (error.code === 'permission-denied') {
+        alert('No tienes permisos para realizar esta operación.');
+      } else if (error.code === 'not-found') {
+        alert('Uno o más boletos seleccionados no existen.');
+      } else {
+        alert('Hubo un error al procesar la compra. Inténtalo de nuevo.');
+      }
+    }
+  };
+
   const renderZone = (zone) => {
     const zoneTickets = tickets.filter(ticket => ticket.zone === zone);
     const rows = [...new Set(zoneTickets.map(ticket => ticket.seat.match(/^[A-Z](\d{2})/)[1]))].sort();
@@ -68,15 +142,18 @@ function AuditorioITIZ({ event }) {
             {zoneTickets
               .filter(ticket => ticket.seat.startsWith(`${zone}${row}`))
               .sort((a, b) => a.seat.localeCompare(b.seat))
-              .map(ticket => (
-                <div
-                  key={ticket.id}
-                  className={`seat ${ticket.isAvailable ? 'available' : 'occupied'} ${selectedSeats.includes(ticket.id) ? 'selected' : ''} ${ticket.type === 'VIP' ? 'vip' : 'general'}`}
-                  onClick={() => ticket.isAvailable && toggleSeatSelection(ticket.id)}
-                >
-                  {ticket.seat.slice(-2)}
-                </div>
-              ))}
+              .map(ticket => {
+                console.log(`Asiento ${ticket.seat}: ${ticket.isAvailable ? 'Disponible' : 'No disponible'}`);
+                return (
+                  <div
+                    key={ticket.id}
+                    className={`seat ${ticket.isAvailable ? 'available' : 'unavailable'} ${selectedSeats.includes(ticket.id) ? 'selected' : ''} ${ticket.type === 'VIP' ? 'vip' : 'general'}`}
+                    onClick={() => ticket.isAvailable && toggleSeatSelection(ticket.id)}
+                  >
+                    {ticket.seat.slice(-2)}
+                  </div>
+                );
+              })}
           </div>
         ))}
       </div>
@@ -130,11 +207,28 @@ function AuditorioITIZ({ event }) {
           <div className="text-gray-500 italic mb-4">
             {selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Aún no has seleccionado asientos'}
           </div>
-          <button className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:bg-gray-400" disabled={selectedSeats.length === 0}>
-            Comprar Boletos
+          <button
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:bg-gray-400"
+            disabled={selectedSeats.length === 0 || !user}
+            onClick={handlePurchase}
+          >
+            {user
+              ? selectedSeats.length > 0
+                ? `Comprar boletos para ${selectedSeats.length} asientos`
+                : 'Selecciona asientos'
+              : 'Inicia sesión para comprar boletos'}
           </button>
         </div>
       </div>
+
+      {/* Payment Popup */}
+      {showPopup && (
+        <PaymentPopup
+          selectedSeats={selectedSeats}
+          onClose={() => setShowPopup(false)}
+          onConfirm={confirmPurchase}
+        />
+      )}
     </div>
   );
 }

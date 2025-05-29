@@ -83,6 +83,13 @@
   cursor: not-allowed;
 }
 
+/* Estilo para asientos no disponibles */
+.seat.unavailable {
+  background-color: #808080 !important; /* Gris para asientos comprados */
+  color: white !important;
+  cursor: not-allowed !important;
+}
+
 /* Estilos para asientos seleccionados */
 .seat.selected {
   background-color: #22c55e !important; /* Verde para asientos seleccionados */
