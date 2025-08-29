@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchEvents } from '../utils/fetchEvents.js';
 import { Link } from 'react-router-dom';
-import '../styles/EventsPage.css'; // Assuming you have a CSS file for additional styles
+import '../styles/EventsPage.css'; // Cargando los estilos desde EventPage
 
 const capitalize = str => str.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
