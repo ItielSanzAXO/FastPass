@@ -1,6 +1,10 @@
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.js'; // Importar el contexto
 import HomePage from './components/HomePage.js';
+import AddEvent from './components/AddEvent.js';
+import HelpPage from './components/HelpPage.js';
+import About from './components/About.js';
+import Contact from './components/Contact.js';
 import EventsPage from './components/EventsPage.js';
 import EventDetail from './components/EventDetail.js'; // Importar EventDetail
 import ResalePage from './components/ResalePage.js';
@@ -72,6 +76,10 @@ function App() {
               <Route path="/event/:eventId" component={EventDetail} />
               <Route path="/resale" component={ResalePage} />
               <Route path="/account" component={UserAccountPage} />
+              <Route path="/HelpPage" component={HelpPage} />
+              <Route path="/About" component={About} />
+              <Route path="/Contact" component={Contact} />
+              <Route path="/add-event" component={AddEvent} />
             </Switch>
           </div>
           <Footer />

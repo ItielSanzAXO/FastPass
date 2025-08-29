@@ -1,0 +1,71 @@
+/* Estilos compartidos para About, Contact y HelpPage */
+.card {
+  max-width: 600px;
+  margin: 40px auto;
+  background: linear-gradient(135deg, #f8fafc 60%, #e0e7ff 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(60, 60, 120, 0.12);
+  padding: 32px;
+  font-family: Arial, sans-serif;
+  color: #222;
+  border: 1px solid #e0e7ff;
+}
+.card-title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 18px;
+  color: #3b82f6;
+  letter-spacing: 1px;
+}
+.card-subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #6366f1;
+  margin-bottom: 24px;
+  font-style: italic;
+}
+.card-list {
+  font-size: 1rem;
+  padding-left: 20px;
+  margin-bottom: 18px;
+}
+.card-form {
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+.card-form-title {
+  text-align: center;
+  color: #3b82f6;
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+}
+.card-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+.card-input, .card-textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 12px;
+}
+.card-button {
+  background: #3b82f6;
+  color: #fff;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+}
+.card-footer {
+  color: #64748b;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-top: 24px;
+}
