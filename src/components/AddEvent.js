@@ -1,5 +1,7 @@
 // --- IMPORTS ---
 import React, { useState, useEffect } from "react";
+import AdminLoginForm from "./AdminLoginForm.js";
+import EventForm from "./EventForm.js";
 import { db } from "../firebaseConfig.js";
 import { doc, setDoc, collection, getDocs, Timestamp } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
@@ -44,6 +46,15 @@ function AddEvent() {
   const [loginError, setLoginError] = useState("");
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Cerrar sesión
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setLoginEmail("");
+    setLoginPassword("");
+    setLoginError("");
+    setLoginAttempts(0);
+  };
 
   const [action, setAction] = useState("");
   const [events, setEvents] = useState([]);
@@ -193,24 +204,34 @@ function AddEvent() {
 
   // --- Render ---
   return (
-    <div className="add-event-main-bg">
+    <div className="add-event-main-bg" style={{ position: 'relative' }}>
+      {isLoggedIn && (
+        <button
+          className="add-event-logout-btn"
+          style={{
+            position: "absolute",
+            top: 24,
+            right: 32
+          }}
+          onClick={handleLogout}
+        >
+          Cerrar sesión
+        </button>
+      )}
       <div className="add-event-card-central">
+        {/* ...existing code... */}
         {!isLoggedIn ? (
-          <form className="add-event-form add-event-form-login" onSubmit={handleLogin}>
-            <h2 className="add-event-title">Acceso Administrador</h2>
-            <div className="add-event-form-row">
-              <label>Email</label>
-              <input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
-            </div>
-            <div className="add-event-form-row">
-              <label>Contraseña</label>
-              <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
-            </div>
-            <button className="add-event-btn add-event-btn-blue" type="submit">Iniciar sesión</button>
-            {loginError && <div className="add-event-error">{loginError}</div>}
-          </form>
+          <AdminLoginForm
+            loginEmail={loginEmail}
+            setLoginEmail={setLoginEmail}
+            loginPassword={loginPassword}
+            setLoginPassword={setLoginPassword}
+            handleLogin={handleLogin}
+            loginError={loginError}
+          />
         ) : (
           <>
+            {/* ...existing code... */}
             {!action ? (
               <div className="add-event-actions">
                 <h2 className="add-event-title">¿Qué deseas hacer?</h2>
@@ -224,123 +245,60 @@ function AddEvent() {
             {action === "add" && (
               <div className="add-event-form-section">
                 <h2 className="add-event-title">Agregar Evento</h2>
-                <form className="add-event-form" onSubmit={handleSubmit}>
-                  <div className="add-event-form-row">
-                    <label>Nombre del evento</label>
-                    <input name="name" value={form.name} onChange={handleChange} required />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Venue</label>
-                    <select name="venueId" value={form.venueId} onChange={handleChange} required>
-                      <option value="auditorio-itiz">Auditorio ITIZ</option>
-                      <option value="duela-itiz">Duela ITIZ</option>
-                      <option value="salon-51">Salon 51</option>
-                    </select>
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Fecha y hora principal</label>
-                    <input type="datetime-local" name="date" value={form.date} onChange={handleChange} required />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>URL de la imagen</label>
-                    <input name="imageUrl" value={form.imageUrl} onChange={handleChange} required placeholder="https://..." />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Límite de boletos por usuario</label>
-                    <input name="ticketLimitPerUser" type="number" min="1" value={form.ticketLimitPerUser} onChange={handleChange} required />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Precio General</label>
-                    <input name="ticketPricingGeneral" type="number" min="0" value={form.ticketPricing.General} onChange={handleChange} required />
-                  </div>
-                  {form.venueId !== "salon-51" && (
-                    <div className="add-event-form-row">
-                      <label>Precio VIP</label>
-                      <input name="ticketPricingVIP" type="number" min="0" value={form.ticketPricing.VIP} onChange={handleChange} />
-                    </div>
-                  )}
-                  <div className="add-event-form-row">
-                    <label>
-                      <input name="allowResale" type="checkbox" checked={form.allowResale} onChange={handleChange} /> Permitir reventa
-                    </label>
-                  </div>
-                  <button className="add-event-btn add-event-btn-blue" type="submit" disabled={loading}>
-                    {loading ? "Agregando..." : "Agregar Evento"}
-                  </button>
-                </form>
-                {success && <div className="add-event-success">{success}</div>}
-                {error && <div className="add-event-error">{error}</div>}
-                <button className="add-event-btn add-event-btn-gray" onClick={() => setAction("")}>Volver</button>
+                <EventForm
+                  mode="add"
+                  form={form}
+                  setForm={setForm}
+                  handleChange={handleChange}
+                  handleSubmit={handleSubmit}
+                  loading={loading}
+                  success={success}
+                  error={error}
+                  onCancel={() => setAction("")}
+                />
               </div>
             )}
 
             {action === "edit" && (
               <div className="add-event-form-section">
                 <h2 className="add-event-title">Editar Evento</h2>
-                <div className="add-event-list-grid">
-                  {events.map(ev => (
-                    <div key={ev.id} className="add-event-card">
-                      <div className="add-event-card-header">
-                        <span className="add-event-card-title">{ev.name}</span>
-                        <span className="add-event-card-id">ID: {ev.id}</span>
-                      </div>
-                      <div className="add-event-card-date">
-                        <span>Fecha principal: {ev.date ? (ev.date.seconds ? new Date(ev.date.seconds * 1000).toLocaleString() : ev.date) : "Sin fecha"}</span>
-                      </div>
-                      <button className="add-event-btn add-event-btn-blue add-event-card-edit" onClick={() => handleEdit(ev)}>
-                        ✏️ Editar
-                      </button>
+                {/* Si NO se está editando, mostrar las cards. Si SÍ se está editando, mostrar solo el form */}
+                {!editId ? (
+                  <>
+                    <div className="add-event-list-grid">
+                      {events.map(ev => (
+                        <div key={ev.id} className="add-event-card">
+                          <div className="add-event-card-header">
+                            <span className="add-event-card-title">{ev.name}</span>
+                            <span className="add-event-card-id">ID: {ev.id}</span>
+                          </div>
+                          <div className="add-event-card-date">
+                            <span>Fecha principal: {ev.date ? (ev.date.seconds ? new Date(ev.date.seconds * 1000).toLocaleString() : ev.date) : "Sin fecha"}</span>
+                          </div>
+                          <button className="add-event-btn add-event-btn-blue add-event-card-edit" onClick={() => handleEdit(ev)}>
+                            ✏️ Editar
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                {editId && (
-                  <form className="add-event-form" onSubmit={handleEditSubmit}>
-                    <div className="add-event-form-row">
-                      <label>Nombre del evento</label>
-                      <input name="name" value={editForm.name} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Venue</label>
-                      <select name="venueId" value={editForm.venueId} onChange={handleEditChange} required>
-                        <option value="auditorio-itiz">Auditorio ITIZ</option>
-                        <option value="duela-itiz">Duela ITIZ</option>
-                        <option value="salon-51">Salon 51</option>
-                      </select>
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Fecha y hora principal</label>
-                      <input type="datetime-local" name="date" value={editForm.date} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>URL de la imagen</label>
-                      <input name="imageUrl" value={editForm.imageUrl} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Límite de boletos por usuario</label>
-                      <input name="ticketLimitPerUser" type="number" min="1" value={editForm.ticketLimitPerUser} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Precio General</label>
-                      <input name="ticketPricingGeneral" type="number" min="0" value={editForm.ticketPricing.General} onChange={handleEditChange} required />
-                    </div>
-                    {editForm.venueId !== "salon-51" && (
-                      <div className="add-event-form-row">
-                        <label>Precio VIP</label>
-                        <input name="ticketPricingVIP" type="number" min="0" value={editForm.ticketPricing.VIP} onChange={handleEditChange} />
-                      </div>
-                    )}
-                    <div className="add-event-form-row">
-                      <label>
-                        <input name="allowResale" type="checkbox" checked={editForm.allowResale} onChange={handleEditChange} /> Permitir reventa
-                      </label>
-                    </div>
-                    <button className="add-event-btn add-event-btn-blue" type="submit">Guardar cambios</button>
-                    <button className="add-event-btn add-event-btn-gray" type="button" onClick={() => setEditId(null)}>Cancelar</button>
-                    {editSuccess && <div className="add-event-success">{editSuccess}</div>}
-                    {editError && <div className="add-event-error">{editError}</div>}
-                  </form>
+                    <button className="add-event-btn add-event-btn-gray" onClick={() => setAction("")}>Volver</button>
+                  </>
+                ) : (
+                  <>
+                    <EventForm
+                      mode="edit"
+                      form={editForm}
+                      setForm={setEditForm}
+                      handleChange={handleEditChange}
+                      handleSubmit={handleEditSubmit}
+                      loading={false}
+                      success={editSuccess}
+                      error={editError}
+                      onCancel={() => setEditId(null)}
+                      isEdit={true}
+                    />
+                  </>
                 )}
-                <button className="add-event-btn add-event-btn-gray" onClick={() => setAction("")}>Volver</button>
               </div>
             )}
           </>
