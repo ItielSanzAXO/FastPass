@@ -16,8 +16,9 @@ function formatDate(date) {
 function TicketModal({ isOpen, onClose, ticket, userName }) {
   if (!isOpen || !ticket) return null;
 
-  // Liga única del boleto (puedes personalizar la URL)
-  const ticketUrl = `https://tusitio.com/boleto/${ticket.id}`;
+  // URL del boleto
+  // Liga única del boleto para validación en localhost
+  const ticketUrl = `http://fastpass-91ef9.web.app/validate?id=${ticket.id}`;
 
   return (
     <div className="ticket-modal-overlay">
