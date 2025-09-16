@@ -17,6 +17,7 @@
   color: #fff;
   border: 1.5px solid #1769aa;
 }
+
 .add-event-form-section {
   padding: 0;
   max-width: 100%;
@@ -37,6 +38,7 @@
   width: 100%;
   margin-bottom: 24px;
 }
+
 .add-event-card {
   background: #f7f7fa;
   border: 1px solid #e0e0e0;
@@ -49,7 +51,70 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  position: relative; /* para overlay cuando hay imagen */
+  overflow: hidden;   /* asegura bordes redondeados con imagen */
 }
+
+/* ----- Fondo con imagen en la card ----- */
+.add-event-card.has-bg {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  border-color: rgba(255,255,255,0.25);
+  min-height: 180px; /* ajusta a gusto (220-260px también se ve bien) */
+}
+.add-event-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
+  border-radius: inherit;
+  pointer-events: none;
+}
+.add-event-card-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* Texto sobre imagen */
+.add-event-card.has-bg .add-event-card-title { color: #fff; }
+.add-event-card.has-bg .add-event-card-date { color: #f1f1f1; }
+.add-event-card.has-bg .add-event-badge {
+  background: rgba(255, 243, 205, 0.9);
+  color: #7a5a00;
+}
+
+/* Mejora hover de botones sobre imagen */
+.add-event-card.has-bg .add-event-btn-blue:hover { background: #145c9c; }
+.add-event-card.has-bg .add-event-btn-red:hover { background: #b01b28; }
+
+/* ----- Header de la card ----- */
+.add-event-card-header {
+  width: 100%;
+  margin-bottom: 8px;
+}
+.add-event-card-title,
+.add-event-card-id {
+  display: block; /* fuerza salto de línea entre título e ID */
+  line-height: 1.35;
+}
+
+/* Fecha */
+.add-event-card-date {
+  font-size: 1em;
+  color: #444;
+  margin-bottom: 18px;
+}
+
+/* Acciones de la card */
+.add-event-card-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Botón editar de las cards (estilo legacy, sigue funcionando) */
 .add-event-card-edit {
   background: #2196f3;
   color: #fff;
@@ -67,17 +132,14 @@
   align-items: center;
   justify-content: center;
 }
-.add-event-card-date {
-  font-size: 1em;
-  color: #444;
-  margin-bottom: 18px;
-}
 .add-event-card-edit:hover {
   background: #2196f3;
   color: #fff;
   box-shadow: none;
   transform: none;
 }
+
+/* Layout general */
 .add-event-main-bg {
   min-height: 100vh;
   background: #f3f6fa;
@@ -109,6 +171,7 @@
   color: #222;
 }
 
+/* Formulario */
 .add-event-form {
   width: 100%;
   display: flex;
@@ -120,7 +183,6 @@
   flex-direction: column;
   gap: 6px;
 }
-
 .add-event-form-row.checkbox-row {
   flex-direction: row;
   align-items: center;
@@ -149,6 +211,8 @@
 .add-event-form select:focus {
   border-color: #2196f3;
 }
+
+/* Botones */
 .add-event-btn {
   padding: 12px 0;
   border-radius: 7px;
@@ -183,6 +247,17 @@
 .add-event-btn-gray:hover {
   background: #bdbdbd;
 }
+/* Botón rojo eliminar */
+.add-event-btn-red {
+  background: #e63946;
+  color: #fff;
+}
+.add-event-btn-red:hover {
+  background: #c71f2d;
+  color: #fff;
+}
+
+/* Mensajes */
 .add-event-error {
   color: #d32f2f;
   background: #fff0f0;
@@ -198,4 +273,16 @@
   padding: 8px 12px;
   margin-top: 6px;
   text-align: center;
+}
+
+/* Badge “Lanzamiento próximo” */
+.add-event-badge {
+  background: #fff3cd;
+  color: #7a5a00;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 600;
+  display: inline-block;
+  margin: 8px 0;
 }

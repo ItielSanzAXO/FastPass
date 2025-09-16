@@ -10,9 +10,11 @@ import {
   getDoc,
   getDocs,
   Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 import {
   getAuth,
+  onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
@@ -27,7 +29,7 @@ const initialState = {
   ticketLimitPerUser: 1,
   ticketPricing: { General: 0, VIP: 0 },
   imageUrl: "",
-  // Para inputs <input type="datetime-local" />
+  isUpcomingLaunch: false, // ⬅️ flag para lanzamientos
   date: "", // 'YYYY-MM-DDTHH:mm'
 };
 
@@ -35,7 +37,7 @@ function pad2(n) {
   return String(n).padStart(2, "0");
 }
 
-// Convierte Firestore Timestamp | Date | string a 'YYYY-MM-DDTHH:mm' (local)
+// Firestore Timestamp | Date | string -> 'YYYY-MM-DDTHH:mm' local
 function fromTimestampToLocalInput(value) {
   if (!value) return "";
   let d;
@@ -50,7 +52,6 @@ function fromTimestampToLocalInput(value) {
     if (!isNaN(tmp.getTime())) d = tmp;
   }
   if (!d || isNaN(d.getTime())) return "";
-
   const yyyy = d.getFullYear();
   const MM = pad2(d.getMonth() + 1);
   const dd = pad2(d.getDate());
@@ -59,7 +60,7 @@ function fromTimestampToLocalInput(value) {
   return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
 }
 
-// Convierte 'YYYY-MM-DDTHH:mm' a Firestore Timestamp
+// 'YYYY-MM-DDTHH:mm' -> Firestore Timestamp
 function toTimestamp(input) {
   if (!input) return null;
   const d = new Date(input);
@@ -69,19 +70,25 @@ function toTimestamp(input) {
 
 // --- COMPONENTE ---
 function AddEvent() {
-  // Estado para el usuario autenticado
+  // Sesión (para logs)
   const [user, setUser] = useState(null);
-
-  // Actualizar usuario autenticado al montar el componente o cuando cambie el login
   useEffect(() => {
     const auth = getAuth();
     setUser(auth.currentUser);
-    // Listener para cambios de autenticación
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
+  // Logs de sesión (usa `user` y quita el warning)
+  useEffect(() => {
+    if (user) {
+      console.log("[AUTH] Sesión activa:", { uid: user.uid, email: user.email });
+    } else {
+      console.log("[AUTH] Sesión: null");
+    }
+  }, [user]);
+
   // Login/Admin
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -118,37 +125,32 @@ function AddEvent() {
     auth.signOut();
   };
 
-  // --- Login admin seguro con Google + password en colección admins ---
+  // --- Login admin (Google + verificación en /admins por email) ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError("");
 
     const auth = getAuth();
-    let user = auth.currentUser;
+    let current = auth.currentUser;
 
-    // Si no hay usuario autenticado, solicitar Google Sign-In
-    if (!user) {
+    if (!current) {
       try {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
-        user = result.user;
-      } catch (err) {
+        current = result.user;
+      } catch {
         setLoginError("Debes iniciar sesión con Google para continuar");
         return;
       }
     }
 
-    console.log("[DEBUG] Usuario autenticado con Firebase Auth:", user?.email);
+    console.log("[DEBUG] Usuario autenticado:", current?.email);
 
-    // Validar permisos en colección admins
     try {
-      const adminDoc = await getDoc(doc(db, "admins", user.email));
+      const adminDoc = await getDoc(doc(db, "admins", current.email));
       if (!adminDoc.exists()) {
         setLoginError("No tienes permisos de administrador");
-        console.log(
-          "[DEBUG] El email autenticado no está en la colección admins:",
-          user.email
-        );
+        console.log("[DEBUG] No está en /admins:", current.email);
         return;
       }
       const data = adminDoc.data();
@@ -157,19 +159,19 @@ function AddEvent() {
         setLoginAttempts(next);
         setLoginError("Contraseña incorrecta");
         if (next >= 3) history.push("/");
-        console.log("[DEBUG] Password incorrecto para:", user.email);
+        console.log("[DEBUG] Password incorrecto para:", current.email);
         return;
       }
       setIsLoggedIn(true);
       setLoginAttempts(0);
-      console.log("[DEBUG] Login de admin exitoso para:", user.email);
+      console.log("[DEBUG] Login admin OK:", current.email);
     } catch (err) {
       setLoginError("Error de conexión");
       console.log("[DEBUG] Error al validar admin:", err);
     }
   };
 
-  // --- Cargar eventos cuando hay login ---
+  // --- Cargar eventos ---
   useEffect(() => {
     if (!isLoggedIn) return;
     (async () => {
@@ -190,10 +192,27 @@ function AddEvent() {
       ticketLimitPerUser: Number(event.ticketLimitPerUser || 1),
       ticketPricing: event.ticketPricing || { General: 0, VIP: 0 },
       imageUrl: event.imageUrl || "",
+      isUpcomingLaunch: !!event.isUpcomingLaunch,
       date: fromTimestampToLocalInput(event.date || ""),
     });
     setEditSuccess("");
     setEditError("");
+  };
+
+  // --- Eliminar evento ---
+  const handleDelete = async (id, name) => {
+    const ok = window.confirm(
+      `¿Seguro que quieres eliminar el evento "${name}"? Esta acción no se puede deshacer.`
+    );
+    if (!ok) return;
+    try {
+      await deleteDoc(doc(db, "events", id));
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+      alert("Evento eliminado correctamente ✅");
+      if (editId === id) setEditId(null);
+    } catch (err) {
+      alert("Error al eliminar evento: " + err.message);
+    }
   };
 
   // --- Cambios en formulario de edición ---
@@ -221,34 +240,45 @@ function AddEvent() {
     e.preventDefault();
     setEditSuccess("");
     setEditError("");
-    // Validación básica de campos obligatorios
+
     if (!editForm.name || !editForm.name.trim()) {
       setEditError("El nombre del evento es obligatorio.");
       return;
     }
-    if (!editForm.date || isNaN(new Date(editForm.date).getTime())) {
-      setEditError("La fecha es obligatoria y debe ser válida.");
-      return;
-    }
-    try {
-      if (user && user.email) {
-        console.log('Email autenticado (edit):', user.email);
-      } else {
-        console.log('No hay usuario autenticado (edit)');
+
+    const isLaunch = editForm.isUpcomingLaunch === true;
+    if (!isLaunch) {
+      if (!editForm.date || isNaN(new Date(editForm.date).getTime())) {
+        setEditError("La fecha es obligatoria y debe ser válida.");
+        return;
       }
-      const payload = {
-        ...editForm,
-        ticketLimitPerUser: Number(editForm.ticketLimitPerUser || 1),
-        ticketPricing: {
-          General: Number(editForm.ticketPricing?.General || 0),
-          VIP:
-            editForm.venueId === "salon-51"
-              ? 0
-              : Number(editForm.ticketPricing?.VIP || 0),
-        },
-        date: toTimestamp(editForm.date),
-      };
-  console.log('Payload enviado a Firestore (edit):', payload);
+    }
+
+    try {
+      let payload;
+      if (isLaunch) {
+        payload = {
+          name: editForm.name.trim(),
+          venueId: editForm.venueId,
+          imageUrl: editForm.imageUrl,
+          isUpcomingLaunch: true,
+        };
+      } else {
+        payload = {
+          ...editForm,
+          ticketLimitPerUser: Number(editForm.ticketLimitPerUser || 1),
+          ticketPricing: {
+            General: Number(editForm.ticketPricing?.General || 0),
+            VIP:
+              editForm.venueId === "salon-51"
+                ? 0
+                : Number(editForm.ticketPricing?.VIP || 0),
+          },
+          date: toTimestamp(editForm.date),
+          isUpcomingLaunch: false,
+        };
+      }
+
       await setDoc(doc(db, "events", editId), payload, { merge: true });
       setEditSuccess("Evento editado correctamente ✅");
       setEditId(null);
@@ -283,36 +313,50 @@ function AddEvent() {
     setSuccess("");
     setError("");
     setLoading(true);
-    // Validación básica de campos obligatorios
+
     if (!form.name || !form.name.trim()) {
       setError("El nombre del evento es obligatorio.");
       setLoading(false);
       return;
     }
-    if (!form.date || isNaN(new Date(form.date).getTime())) {
-      setError("La fecha es obligatoria y debe ser válida.");
-      setLoading(false);
-      return;
-    }
+
     try {
-      if (user && user.email) {
-        console.log('Email autenticado (add):', user.email);
+      const isLaunch =
+        form.isUpcomingLaunch === true
+          ? true
+          : window.confirm(
+              "¿Es un lanzamiento próximo? (Aceptar = Sí; se guardará solo Nombre, Venue e Imagen)"
+            );
+
+      let payload;
+      if (isLaunch) {
+        payload = {
+          name: form.name.trim(),
+          venueId: form.venueId,
+          imageUrl: form.imageUrl,
+          isUpcomingLaunch: true,
+        };
       } else {
-        console.log('No hay usuario autenticado (add)');
+        if (!form.date || isNaN(new Date(form.date).getTime())) {
+          setError("La fecha es obligatoria y debe ser válida.");
+          setLoading(false);
+          return;
+        }
+        payload = {
+          ...form,
+          ticketLimitPerUser: Number(form.ticketLimitPerUser || 1),
+          ticketPricing: {
+            General: Number(form.ticketPricing?.General || 0),
+            VIP:
+              form.venueId === "salon-51"
+                ? 0
+                : Number(form.ticketPricing?.VIP || 0),
+          },
+          date: toTimestamp(form.date),
+          isUpcomingLaunch: false,
+        };
       }
-      const payload = {
-        ...form,
-        ticketLimitPerUser: Number(form.ticketLimitPerUser || 1),
-        ticketPricing: {
-          General: Number(form.ticketPricing?.General || 0),
-          VIP:
-            form.venueId === "salon-51"
-              ? 0
-              : Number(form.ticketPricing?.VIP || 0),
-        },
-        date: toTimestamp(form.date),
-      };
-  console.log('Payload enviado a Firestore (add):', payload);
+
       const docId = form.name.trim().replace(/\s+/g, "-").toLowerCase();
       await setDoc(doc(db, "events", docId), payload);
       setSuccess("Evento agregado correctamente ✅");
@@ -391,36 +435,56 @@ function AddEvent() {
                 {!editId ? (
                   <>
                     <div className="add-event-list-grid">
-                      {events.map((ev) => (
-                        <div key={ev.id} className="add-event-card">
-                          <div className="add-event-card-header">
-                            <span className="add-event-card-title">
-                              {ev.name}
-                            </span>
-                            <span className="add-event-card-id">
-                              ID: {ev.id}
-                            </span>
-                          </div>
-                          <div className="add-event-card-date">
-                            <span>
-                              Fecha principal:{" "}
-                              {ev.date
-                                ? ev.date.seconds
-                                  ? new Date(
-                                      ev.date.seconds * 1000
-                                    ).toLocaleString()
-                                  : String(ev.date)
-                                : "Sin fecha"}
-                            </span>
-                          </div>
-                          <button
-                            className="add-event-btn add-event-btn-blue add-event-card-edit"
-                            onClick={() => handleEdit(ev)}
+                        {events.map((ev) => (
+                          <div
+                            key={ev.id}
+                            className={`add-event-card ${ev.imageUrl ? "has-bg" : ""}`}
+                            style={ev.imageUrl ? { backgroundImage: `url(${ev.imageUrl})` } : undefined}
                           >
-                            ✏️ Editar
-                          </button>
-                        </div>
-                      ))}
+                            {/* overlay solo si hay imagen */}
+                            {ev.imageUrl && <div className="add-event-card-overlay" />}
+
+                            {/* contenido */}
+                            <div className="add-event-card-content">
+                              <div className="add-event-card-header">
+                                <div className="add-event-card-title">
+                                  <strong>Evento:</strong> {`"${ev.name || "Sin nombre"}"`}
+                                </div>
+                                {/* ID oculto */}
+                              </div>
+
+                              {ev.isUpcomingLaunch && (
+                                <div className="add-event-badge">Lanzamiento próximo</div>
+                              )}
+
+                              <div className="add-event-card-date">
+                                <span>
+                                  Fecha principal:{" "}
+                                  {ev.date
+                                    ? ev.date.seconds
+                                      ? new Date(ev.date.seconds * 1000).toLocaleString()
+                                      : String(ev.date)
+                                    : "Sin fecha"}
+                                </span>
+                              </div>
+
+                              <div className="add-event-card-actions">
+                                <button
+                                  className="add-event-btn add-event-btn-blue add-event-card-edit"
+                                  onClick={() => handleEdit(ev)}
+                                >
+                                  ✏️ Editar
+                                </button>
+                                <button
+                                  className="add-event-btn add-event-btn-red add-event-card-delete"
+                                  onClick={() => handleDelete(ev.id, ev.name)}
+                                >
+                                  🗑️ Eliminar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                     </div>
                     <button
                       className="add-event-btn add-event-btn-gray"
@@ -443,6 +507,13 @@ function AddEvent() {
                       onCancel={() => setEditId(null)}
                       isEdit={true}
                     />
+                    <button
+                      className="add-event-btn add-event-btn-red"
+                      onClick={() => handleDelete(editId, editForm.name || editId)}
+                      style={{ marginTop: 12 }}
+                    >
+                      🗑️ Eliminar este evento
+                    </button>
                   </>
                 )}
               </div>
