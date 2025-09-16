@@ -27,7 +27,6 @@ export default function EventForm(props) {
   } = props;
 
   const isLaunch = !!form.isUpcomingLaunch;
-  const vipDisabled = form.venueId === "salon-51";
 
   return (
     <form className="add-event-form" onSubmit={handleSubmit}>
@@ -56,7 +55,7 @@ export default function EventForm(props) {
         >
           <option value="auditorio-itiz">Auditorio ITIZ</option>
           <option value="salon-51">Salón 51</option>
-          {/* Agrega más opciones si necesitas */}
+          <option value="duela-itiz">Duela ITIZ</option>
         </select>
       </div>
 
@@ -119,6 +118,17 @@ export default function EventForm(props) {
           {/* Precios */}
           <div className="add-event-form-row">
             <label>Precios</label>
+            <div style={{ marginBottom: 4, fontSize: 13, color: '#555' }}>
+              {form.venueId === "salon-51" ? (
+                <span>Solo hay boletos <strong>Generales</strong> en Salón 51.</span>
+              ) : (
+                <span>
+                  Hay boletos <strong>Generales</strong> y <strong>VIP</strong> en este venue.<br/>
+                  <strong>General</strong>: acceso regular.<br/>
+                  <strong>VIP</strong>: acceso preferente o zona especial.
+                </span>
+              )}
+            </div>
             <div style={{ display: "flex", gap: 8 }}>
               <input
                 name="ticketPricingGeneral"
@@ -128,16 +138,17 @@ export default function EventForm(props) {
                 onChange={handleChange}
                 placeholder="General"
               />
-              <input
-                name="ticketPricingVIP"
-                type="number"
-                min="0"
-                value={vipDisabled ? 0 : (form.ticketPricing?.VIP ?? 0)}
-                onChange={handleChange}
-                placeholder="VIP"
-                disabled={vipDisabled}
-                title={vipDisabled ? "VIP no aplica para esta sede" : "Precio VIP"}
-              />
+              {form.venueId !== "salon-51" && (
+                <input
+                  name="ticketPricingVIP"
+                  type="number"
+                  min="0"
+                  value={form.ticketPricing?.VIP ?? 0}
+                  onChange={handleChange}
+                  placeholder="VIP"
+                  title="Precio VIP"
+                />
+              )}
             </div>
           </div>
 
