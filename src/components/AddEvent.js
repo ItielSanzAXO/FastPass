@@ -1,11 +1,27 @@
 // --- IMPORTS ---
 import React, { useState, useEffect } from "react";
+import AdminLoginForm from "./AdminLoginForm.js";
+import EventForm from "./EventForm.js";
 import { db } from "../firebaseConfig.js";
-import { doc, setDoc, collection, getDocs, Timestamp } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  collection,
+  getDoc,
+  getDocs,
+  Timestamp,
+  deleteDoc,
+} from "firebase/firestore";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
 import { useHistory } from "react-router-dom";
 import "../styles/AddEvent.css";
 
-// --- STATE INICIAL ---
+// --- Helpers / Estado inicial ---
 const initialState = {
   name: "",
   venueId: "auditorio-itiz",
@@ -13,31 +29,66 @@ const initialState = {
   ticketLimitPerUser: 1,
   ticketPricing: { General: 0, VIP: 0 },
   imageUrl: "",
-  date: "" // string para el input type="datetime-local"
+  isUpcomingLaunch: false, // ⬅️ flag para lanzamientos
+  date: "", // 'YYYY-MM-DDTHH:mm'
 };
 
-// --- HELPERS ---
-const toTimestamp = (value) => {
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+// Firestore Timestamp | Date | string -> 'YYYY-MM-DDTHH:mm' local
+function fromTimestampToLocalInput(value) {
   if (!value) return "";
-  const d = new Date(value);
-  return isNaN(d.getTime()) ? "" : Timestamp.fromDate(d);
-};
+  let d;
+  if (value instanceof Timestamp) {
+    d = value.toDate();
+  } else if (value?.seconds && typeof value.seconds === "number") {
+    d = new Date(value.seconds * 1000);
+  } else if (value instanceof Date) {
+    d = value;
+  } else if (typeof value === "string") {
+    const tmp = new Date(value);
+    if (!isNaN(tmp.getTime())) d = tmp;
+  }
+  if (!d || isNaN(d.getTime())) return "";
+  const yyyy = d.getFullYear();
+  const MM = pad2(d.getMonth() + 1);
+  const dd = pad2(d.getDate());
+  const hh = pad2(d.getHours());
+  const mm = pad2(d.getMinutes());
+  return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
+}
 
-const fromTimestampToLocalInput = (ts) => {
-  if (!ts) return "";
-  const dateObj = ts?.toDate ? ts.toDate() : new Date(ts);
-  if (isNaN(dateObj.getTime())) return "";
-  const pad = (n) => String(n).padStart(2, "0");
-  const yyyy = dateObj.getFullYear();
-  const mm = pad(dateObj.getMonth() + 1);
-  const dd = pad(dateObj.getDate());
-  const hh = pad(dateObj.getHours());
-  const mi = pad(dateObj.getMinutes());
-  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-};
+// 'YYYY-MM-DDTHH:mm' -> Firestore Timestamp
+function toTimestamp(input) {
+  if (!input) return null;
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return null;
+  return Timestamp.fromDate(d);
+}
 
 // --- COMPONENTE ---
 function AddEvent() {
+  // Sesión (para logs)
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const auth = getAuth();
+    setUser(auth.currentUser);
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsub();
+  }, []);
+  // Logs de sesión (usa `user` y quita el warning)
+  useEffect(() => {
+    if (user) {
+      console.log("[AUTH] Sesión activa:", { uid: user.uid, email: user.email });
+    } else {
+      console.log("[AUTH] Sesión: null");
+    }
+  }, [user]);
+
   // Login/Admin
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -45,6 +96,7 @@ function AddEvent() {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Acciones / datos
   const [action, setAction] = useState("");
   const [events, setEvents] = useState([]);
 
@@ -62,31 +114,60 @@ function AddEvent() {
 
   const history = useHistory();
 
-  // --- Login admin ---
+  // --- Cerrar sesión ---
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setLoginEmail("");
+    setLoginPassword("");
+    setLoginError("");
+    setLoginAttempts(0);
+    const auth = getAuth();
+    auth.signOut();
+  };
+
+  // --- Login admin (Google + verificación en /admins por email) ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginError("");
+
+    const auth = getAuth();
+    let current = auth.currentUser;
+
+    if (!current) {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        current = result.user;
+      } catch {
+        setLoginError("Debes iniciar sesión con Google para continuar");
+        return;
+      }
+    }
+
+    console.log("[DEBUG] Usuario autenticado:", current?.email);
+
     try {
-      const adminsRef = collection(db, "admins");
-      const snapshot = await getDocs(adminsRef);
-      let found = false;
-      snapshot.forEach((docu) => {
-        const data = docu.data();
-        if (data.email === loginEmail && data.password === loginPassword) {
-          found = true;
-        }
-      });
-      if (found) {
-        setIsLoggedIn(true);
-        setLoginAttempts(0);
-      } else {
+      const adminDoc = await getDoc(doc(db, "admins", current.email));
+      if (!adminDoc.exists()) {
+        setLoginError("No tienes permisos de administrador");
+        console.log("[DEBUG] No está en /admins:", current.email);
+        return;
+      }
+      const data = adminDoc.data();
+      if (data.password !== loginPassword) {
         const next = loginAttempts + 1;
         setLoginAttempts(next);
-        setLoginError("Usuario o contraseña incorrectos");
+        setLoginError("Contraseña incorrecta");
         if (next >= 3) history.push("/");
+        console.log("[DEBUG] Password incorrecto para:", current.email);
+        return;
       }
-    } catch {
+      setIsLoggedIn(true);
+      setLoginAttempts(0);
+      console.log("[DEBUG] Login admin OK:", current.email);
+    } catch (err) {
       setLoginError("Error de conexión");
+      console.log("[DEBUG] Error al validar admin:", err);
     }
   };
 
@@ -101,7 +182,7 @@ function AddEvent() {
     })();
   }, [isLoggedIn]);
 
-  // --- Editar ---
+  // --- Seleccionar evento a editar ---
   const handleEdit = (event) => {
     setEditId(event.id);
     setEditForm({
@@ -111,39 +192,93 @@ function AddEvent() {
       ticketLimitPerUser: Number(event.ticketLimitPerUser || 1),
       ticketPricing: event.ticketPricing || { General: 0, VIP: 0 },
       imageUrl: event.imageUrl || "",
-      date: fromTimestampToLocalInput(event.date || "")
+      isUpcomingLaunch: !!event.isUpcomingLaunch,
+      date: fromTimestampToLocalInput(event.date || ""),
     });
     setEditSuccess("");
     setEditError("");
   };
 
+  // --- Eliminar evento ---
+  const handleDelete = async (id, name) => {
+    const ok = window.confirm(
+      `¿Seguro que quieres eliminar el evento "${name}"? Esta acción no se puede deshacer.`
+    );
+    if (!ok) return;
+    try {
+      await deleteDoc(doc(db, "events", id));
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+      alert("Evento eliminado correctamente ✅");
+      if (editId === id) setEditId(null);
+    } catch (err) {
+      alert("Error al eliminar evento: " + err.message);
+    }
+  };
+
+  // --- Cambios en formulario de edición ---
   const handleEditChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
       setEditForm((prev) => ({ ...prev, [name]: checked }));
     } else if (name === "ticketPricingGeneral") {
-      setEditForm((prev) => ({ ...prev, ticketPricing: { ...prev.ticketPricing, General: Number(value) } }));
+      setEditForm((prev) => ({
+        ...prev,
+        ticketPricing: { ...prev.ticketPricing, General: Number(value) },
+      }));
     } else if (name === "ticketPricingVIP") {
-      setEditForm((prev) => ({ ...prev, ticketPricing: { ...prev.ticketPricing, VIP: Number(value) } }));
+      setEditForm((prev) => ({
+        ...prev,
+        ticketPricing: { ...prev.ticketPricing, VIP: Number(value) },
+      }));
     } else {
       setEditForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // --- Confirmar edición ---
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setEditSuccess("");
     setEditError("");
+
+    if (!editForm.name || !editForm.name.trim()) {
+      setEditError("El nombre del evento es obligatorio.");
+      return;
+    }
+
+    const isLaunch = editForm.isUpcomingLaunch === true;
+    if (!isLaunch) {
+      if (!editForm.date || isNaN(new Date(editForm.date).getTime())) {
+        setEditError("La fecha es obligatoria y debe ser válida.");
+        return;
+      }
+    }
+
     try {
-      const payload = {
-        ...editForm,
-        ticketLimitPerUser: Number(editForm.ticketLimitPerUser || 1),
-        ticketPricing: {
-          General: Number(editForm.ticketPricing?.General || 0),
-          VIP: editForm.venueId === "salon-51" ? 0 : Number(editForm.ticketPricing?.VIP || 0)
-        },
-        date: toTimestamp(editForm.date)
-      };
+      let payload;
+      if (isLaunch) {
+        payload = {
+          name: editForm.name.trim(),
+          venueId: editForm.venueId,
+          imageUrl: editForm.imageUrl,
+          isUpcomingLaunch: true,
+        };
+      } else {
+        payload = {
+          ...editForm,
+          ticketLimitPerUser: Number(editForm.ticketLimitPerUser || 1),
+          ticketPricing: {
+            General: Number(editForm.ticketPricing?.General || 0),
+            VIP:
+              editForm.venueId === "salon-51"
+                ? 0
+                : Number(editForm.ticketPricing?.VIP || 0),
+          },
+          date: toTimestamp(editForm.date),
+          isUpcomingLaunch: false,
+        };
+      }
+
       await setDoc(doc(db, "events", editId), payload, { merge: true });
       setEditSuccess("Evento editado correctamente ✅");
       setEditId(null);
@@ -152,35 +287,76 @@ function AddEvent() {
     }
   };
 
-  // --- Agregar ---
+  // --- Cambios en formulario de alta ---
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
       setForm((prev) => ({ ...prev, [name]: checked }));
     } else if (name === "ticketPricingGeneral") {
-      setForm((prev) => ({ ...prev, ticketPricing: { ...prev.ticketPricing, General: Number(value) } }));
+      setForm((prev) => ({
+        ...prev,
+        ticketPricing: { ...prev.ticketPricing, General: Number(value) },
+      }));
     } else if (name === "ticketPricingVIP") {
-      setForm((prev) => ({ ...prev, ticketPricing: { ...prev.ticketPricing, VIP: Number(value) } }));
+      setForm((prev) => ({
+        ...prev,
+        ticketPricing: { ...prev.ticketPricing, VIP: Number(value) },
+      }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // --- Confirmar alta ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccess("");
     setError("");
     setLoading(true);
+
+    if (!form.name || !form.name.trim()) {
+      setError("El nombre del evento es obligatorio.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const payload = {
-        ...form,
-        ticketLimitPerUser: Number(form.ticketLimitPerUser || 1),
-        ticketPricing: {
-          General: Number(form.ticketPricing?.General || 0),
-          VIP: form.venueId === "salon-51" ? 0 : Number(form.ticketPricing?.VIP || 0)
-        },
-        date: toTimestamp(form.date)
-      };
+      const isLaunch =
+        form.isUpcomingLaunch === true
+          ? true
+          : window.confirm(
+              "¿Es un lanzamiento próximo? (Aceptar = Sí; se guardará solo Nombre, Venue e Imagen)"
+            );
+
+      let payload;
+      if (isLaunch) {
+        payload = {
+          name: form.name.trim(),
+          venueId: form.venueId,
+          imageUrl: form.imageUrl,
+          isUpcomingLaunch: true,
+        };
+      } else {
+        if (!form.date || isNaN(new Date(form.date).getTime())) {
+          setError("La fecha es obligatoria y debe ser válida.");
+          setLoading(false);
+          return;
+        }
+        payload = {
+          ...form,
+          ticketLimitPerUser: Number(form.ticketLimitPerUser || 1),
+          ticketPricing: {
+            General: Number(form.ticketPricing?.General || 0),
+            VIP:
+              form.venueId === "salon-51"
+                ? 0
+                : Number(form.ticketPricing?.VIP || 0),
+          },
+          date: toTimestamp(form.date),
+          isUpcomingLaunch: false,
+        };
+      }
+
       const docId = form.name.trim().replace(/\s+/g, "-").toLowerCase();
       await setDoc(doc(db, "events", docId), payload);
       setSuccess("Evento agregado correctamente ✅");
@@ -193,30 +369,45 @@ function AddEvent() {
 
   // --- Render ---
   return (
-    <div className="add-event-main-bg">
+    <div className="add-event-main-bg" style={{ position: "relative" }}>
+      {isLoggedIn && (
+        <button
+          className="add-event-logout-btn"
+          style={{ position: "absolute", top: 24, right: 32 }}
+          onClick={handleLogout}
+        >
+          Cerrar sesión
+        </button>
+      )}
+
       <div className="add-event-card-central">
         {!isLoggedIn ? (
-          <form className="add-event-form add-event-form-login" onSubmit={handleLogin}>
-            <h2 className="add-event-title">Acceso Administrador</h2>
-            <div className="add-event-form-row">
-              <label>Email</label>
-              <input type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} required />
-            </div>
-            <div className="add-event-form-row">
-              <label>Contraseña</label>
-              <input type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
-            </div>
-            <button className="add-event-btn add-event-btn-blue" type="submit">Iniciar sesión</button>
-            {loginError && <div className="add-event-error">{loginError}</div>}
-          </form>
+          <AdminLoginForm
+            loginEmail={loginEmail}
+            setLoginEmail={setLoginEmail}
+            loginPassword={loginPassword}
+            setLoginPassword={setLoginPassword}
+            handleLogin={handleLogin}
+            loginError={loginError}
+          />
         ) : (
           <>
             {!action ? (
               <div className="add-event-actions">
                 <h2 className="add-event-title">¿Qué deseas hacer?</h2>
                 <div className="add-event-actions-btns">
-                  <button className="add-event-btn add-event-btn-green" onClick={() => setAction("add")}>Agregar evento</button>
-                  <button className="add-event-btn add-event-btn-blue" onClick={() => setAction("edit")}>Editar evento</button>
+                  <button
+                    className="add-event-btn add-event-btn-green"
+                    onClick={() => setAction("add")}
+                  >
+                    Agregar evento
+                  </button>
+                  <button
+                    className="add-event-btn add-event-btn-blue"
+                    onClick={() => setAction("edit")}
+                  >
+                    Editar evento
+                  </button>
                 </div>
               </div>
             ) : null}
@@ -224,123 +415,107 @@ function AddEvent() {
             {action === "add" && (
               <div className="add-event-form-section">
                 <h2 className="add-event-title">Agregar Evento</h2>
-                <form className="add-event-form" onSubmit={handleSubmit}>
-                  <div className="add-event-form-row">
-                    <label>Nombre del evento</label>
-                    <input name="name" value={form.name} onChange={handleChange} required />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Venue</label>
-                    <select name="venueId" value={form.venueId} onChange={handleChange} required>
-                      <option value="auditorio-itiz">Auditorio ITIZ</option>
-                      <option value="duela-itiz">Duela ITIZ</option>
-                      <option value="salon-51">Salon 51</option>
-                    </select>
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Fecha y hora principal</label>
-                    <input type="datetime-local" name="date" value={form.date} onChange={handleChange} required />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>URL de la imagen</label>
-                    <input name="imageUrl" value={form.imageUrl} onChange={handleChange} required placeholder="https://..." />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Límite de boletos por usuario</label>
-                    <input name="ticketLimitPerUser" type="number" min="1" value={form.ticketLimitPerUser} onChange={handleChange} required />
-                  </div>
-                  <div className="add-event-form-row">
-                    <label>Precio General</label>
-                    <input name="ticketPricingGeneral" type="number" min="0" value={form.ticketPricing.General} onChange={handleChange} required />
-                  </div>
-                  {form.venueId !== "salon-51" && (
-                    <div className="add-event-form-row">
-                      <label>Precio VIP</label>
-                      <input name="ticketPricingVIP" type="number" min="0" value={form.ticketPricing.VIP} onChange={handleChange} />
-                    </div>
-                  )}
-                  <div className="add-event-form-row">
-                    <label>
-                      <input name="allowResale" type="checkbox" checked={form.allowResale} onChange={handleChange} /> Permitir reventa
-                    </label>
-                  </div>
-                  <button className="add-event-btn add-event-btn-blue" type="submit" disabled={loading}>
-                    {loading ? "Agregando..." : "Agregar Evento"}
-                  </button>
-                </form>
-                {success && <div className="add-event-success">{success}</div>}
-                {error && <div className="add-event-error">{error}</div>}
-                <button className="add-event-btn add-event-btn-gray" onClick={() => setAction("")}>Volver</button>
+                <EventForm
+                  mode="add"
+                  form={form}
+                  setForm={setForm}
+                  handleChange={handleChange}
+                  handleSubmit={handleSubmit}
+                  loading={loading}
+                  success={success}
+                  error={error}
+                  onCancel={() => setAction("")}
+                />
               </div>
             )}
 
             {action === "edit" && (
               <div className="add-event-form-section">
                 <h2 className="add-event-title">Editar Evento</h2>
-                <div className="add-event-list-grid">
-                  {events.map(ev => (
-                    <div key={ev.id} className="add-event-card">
-                      <div className="add-event-card-header">
-                        <span className="add-event-card-title">{ev.name}</span>
-                        <span className="add-event-card-id">ID: {ev.id}</span>
-                      </div>
-                      <div className="add-event-card-date">
-                        <span>Fecha principal: {ev.date ? (ev.date.seconds ? new Date(ev.date.seconds * 1000).toLocaleString() : ev.date) : "Sin fecha"}</span>
-                      </div>
-                      <button className="add-event-btn add-event-btn-blue add-event-card-edit" onClick={() => handleEdit(ev)}>
-                        ✏️ Editar
-                      </button>
+                {!editId ? (
+                  <>
+                    <div className="add-event-list-grid">
+                        {events.map((ev) => (
+                          <div
+                            key={ev.id}
+                            className={`add-event-card ${ev.imageUrl ? "has-bg" : ""}`}
+                            style={ev.imageUrl ? { backgroundImage: `url(${ev.imageUrl})` } : undefined}
+                          >
+                            {/* overlay solo si hay imagen */}
+                            {ev.imageUrl && <div className="add-event-card-overlay" />}
+
+                            {/* contenido */}
+                            <div className="add-event-card-content">
+                              <div className="add-event-card-header">
+                                <div className="add-event-card-title">
+                                  <strong>Evento:</strong> {`"${ev.name || "Sin nombre"}"`}
+                                </div>
+                                {/* ID oculto */}
+                              </div>
+
+                              {ev.isUpcomingLaunch && (
+                                <div className="add-event-badge">Lanzamiento próximo</div>
+                              )}
+
+                              <div className="add-event-card-date">
+                                <span>
+                                  Fecha principal:{" "}
+                                  {ev.date
+                                    ? ev.date.seconds
+                                      ? new Date(ev.date.seconds * 1000).toLocaleString()
+                                      : String(ev.date)
+                                    : "Sin fecha"}
+                                </span>
+                              </div>
+
+                              <div className="add-event-card-actions">
+                                <button
+                                  className="add-event-btn add-event-btn-blue add-event-card-edit"
+                                  onClick={() => handleEdit(ev)}
+                                >
+                                  ✏️ Editar
+                                </button>
+                                <button
+                                  className="add-event-btn add-event-btn-red add-event-card-delete"
+                                  onClick={() => handleDelete(ev.id, ev.name)}
+                                >
+                                  🗑️ Eliminar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                     </div>
-                  ))}
-                </div>
-                {editId && (
-                  <form className="add-event-form" onSubmit={handleEditSubmit}>
-                    <div className="add-event-form-row">
-                      <label>Nombre del evento</label>
-                      <input name="name" value={editForm.name} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Venue</label>
-                      <select name="venueId" value={editForm.venueId} onChange={handleEditChange} required>
-                        <option value="auditorio-itiz">Auditorio ITIZ</option>
-                        <option value="duela-itiz">Duela ITIZ</option>
-                        <option value="salon-51">Salon 51</option>
-                      </select>
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Fecha y hora principal</label>
-                      <input type="datetime-local" name="date" value={editForm.date} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>URL de la imagen</label>
-                      <input name="imageUrl" value={editForm.imageUrl} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Límite de boletos por usuario</label>
-                      <input name="ticketLimitPerUser" type="number" min="1" value={editForm.ticketLimitPerUser} onChange={handleEditChange} required />
-                    </div>
-                    <div className="add-event-form-row">
-                      <label>Precio General</label>
-                      <input name="ticketPricingGeneral" type="number" min="0" value={editForm.ticketPricing.General} onChange={handleEditChange} required />
-                    </div>
-                    {editForm.venueId !== "salon-51" && (
-                      <div className="add-event-form-row">
-                        <label>Precio VIP</label>
-                        <input name="ticketPricingVIP" type="number" min="0" value={editForm.ticketPricing.VIP} onChange={handleEditChange} />
-                      </div>
-                    )}
-                    <div className="add-event-form-row">
-                      <label>
-                        <input name="allowResale" type="checkbox" checked={editForm.allowResale} onChange={handleEditChange} /> Permitir reventa
-                      </label>
-                    </div>
-                    <button className="add-event-btn add-event-btn-blue" type="submit">Guardar cambios</button>
-                    <button className="add-event-btn add-event-btn-gray" type="button" onClick={() => setEditId(null)}>Cancelar</button>
-                    {editSuccess && <div className="add-event-success">{editSuccess}</div>}
-                    {editError && <div className="add-event-error">{editError}</div>}
-                  </form>
+                    <button
+                      className="add-event-btn add-event-btn-gray"
+                      onClick={() => setAction("")}
+                    >
+                      Volver
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <EventForm
+                      mode="edit"
+                      form={editForm}
+                      setForm={setEditForm}
+                      handleChange={handleEditChange}
+                      handleSubmit={handleEditSubmit}
+                      loading={false}
+                      success={editSuccess}
+                      error={editError}
+                      onCancel={() => setEditId(null)}
+                      isEdit={true}
+                    />
+                    <button
+                      className="add-event-btn add-event-btn-red"
+                      onClick={() => handleDelete(editId, editForm.name || editId)}
+                      style={{ marginTop: 12 }}
+                    >
+                      🗑️ Eliminar este evento
+                    </button>
+                  </>
                 )}
-                <button className="add-event-btn add-event-btn-gray" onClick={() => setAction("")}>Volver</button>
               </div>
             )}
           </>

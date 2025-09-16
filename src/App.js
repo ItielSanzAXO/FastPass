@@ -11,6 +11,7 @@ import ResalePage from './components/ResalePage.js';
 import LoginPage from './components/LoginPage.js';
 import UserAccountPage from './components/UserAccountPage.js';
 import Footer from './components/Footer.js'; // Importar el Footer
+import ValidateTicketPage from './pages/ValidateTicketPage.js';
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
 import logo from './assets/FastPassBG.png'; // Importar el logo
@@ -80,6 +81,7 @@ function App() {
               <Route path="/About" component={About} />
               <Route path="/Contact" component={Contact} />
               <Route path="/add-event" component={AddEvent} />
+              <Route path="/validate" component={ValidateTicketPage} />
             </Switch>
           </div>
           <Footer />

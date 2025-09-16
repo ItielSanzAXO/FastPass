@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom'; // Importar useHistory para redirección
-import { getAuth, signOut } from 'firebase/auth'; // Importar signOut para cerrar sesión
+import { useHistory } from 'react-router-dom';
+import { getAuth, signOut } from 'firebase/auth';
 import { db } from '../firebaseConfig.js';
 import { collection, getDocs, query, where, doc, getDoc, updateDoc } from 'firebase/firestore';
-
-const globalStyles = {
-  fontFamily: 'Disket Mono, monospace',
-  color: '#1e9ade',
-};
+import '../styles/UserAccountPage.css';
+import TicketModal from './TicketModal.js';
 
 function UserAccountPage() {
   const [userTickets, setUserTickets] = useState([]);
   const [resaleTickets, setResaleTickets] = useState([]);
   const [userInfo, setUserInfo] = useState({ name: '', profilePic: '' });
-  const history = useHistory(); // Hook para redirección
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     const fetchFirebaseUserInfo = async () => {
@@ -46,16 +45,75 @@ function UserAccountPage() {
 
         console.log('Resultados de la consulta:', querySnapshot.docs); // Verificar los resultados de la consulta
 
+
         const fetchedTickets = await Promise.all(
           querySnapshot.docs.map(async (docSnapshot) => {
             const ticketData = docSnapshot.data();
             const eventDocRef = doc(db, 'events', ticketData.eventId);
             const eventDoc = await getDoc(eventDocRef);
 
+            let eventName = 'Evento desconocido';
+            let eventDate = '';
+            let venueId = '';
+            let eventImageUrl = '';
+            let ticketPricing = {};
+            if (eventDoc.exists()) {
+              const eventData = eventDoc.data();
+              eventName = eventData.name || eventName;
+              eventDate = eventData.date || eventData.fecha || '';
+              venueId = eventData.venueId || '';
+              eventImageUrl = eventData.imageUrl || '';
+              ticketPricing = eventData.ticketPricing || {};
+            }
+
+            // Obtener datos del venue si hay venueId
+            let venueName = '';
+            let venueType = '';
+            let venueCapacity = '';
+            let venueZones = [];
+            if (venueId) {
+              try {
+                const venueDocRef = doc(db, 'venues', venueId);
+                const venueDoc = await getDoc(venueDocRef);
+                if (venueDoc.exists()) {
+                  const venueData = venueDoc.data();
+                  venueName = venueData.name || '';
+                  venueType = venueData.type || '';
+                  venueCapacity = venueData.capacity || '';
+                  venueZones = venueData.zones || [];
+                }
+              } catch (e) {
+                console.error('Error obteniendo venue:', e);
+              }
+            }
+
+            // Lógica para determinar el acceso
+            let access = 'General';
+            const zone = (ticketData.zone || '').toUpperCase();
+            if (venueName.toLowerCase().includes('auditorio')) {
+              if (["A", "B", "C", "D"].includes(zone)) {
+                access = 'VIP';
+              }
+            } else if (venueName.toLowerCase().includes('duela')) {
+              if (zone === 'VIP') {
+                access = 'VIP';
+              }
+            } else if (venueName.toLowerCase().includes('salon 51')) {
+              access = 'General';
+            }
+
             return {
               id: docSnapshot.id,
               ...ticketData,
-              eventName: eventDoc.exists() ? eventDoc.data().name : 'Evento desconocido',
+              eventName,
+              date: eventDate,
+              eventImageUrl,
+              ticketPricing,
+              venue: venueName,
+              venueType,
+              venueCapacity,
+              venueZones,
+              access,
             };
           })
         );
@@ -137,70 +195,56 @@ function UserAccountPage() {
   };
 
   return (
-    <div style={{ ...globalStyles, padding: '20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img 
-            src={userInfo.profilePic || null} 
-            alt="Foto de perfil" 
-            style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '10px' }} 
+    <div className="user-account-container">
+      <div className="user-account-header">
+        <div className="user-account-profile">
+          <img
+            src={userInfo.profilePic || null}
+            alt="Foto de perfil"
+            className="user-account-profile-pic"
           />
           <h2>Bienvenido, {userInfo.name}</h2>
         </div>
-        <button 
-          onClick={handleLogout} 
-          style={{ padding: '10px 20px', backgroundColor: '#d9534f', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+        <button
+          onClick={handleLogout}
+          className="user-account-logout-btn"
         >
           Cerrar Sesión
         </button>
       </div>
       <h1>Mis Boletos</h1>
-      <ul style={{ 
-        listStyleType: 'none', 
-        padding: 0, 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '20px' 
-      }}>
+      <ul className="user-account-tickets-list">
         {userTickets.map(ticket => (
-          <li 
-            key={ticket.id} 
-            style={{ 
-              padding: '15px', 
-              border: '2px solid #6995bb', 
-              borderRadius: '10px', 
-              backgroundColor: '#eefbff', 
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-              transition: 'transform 0.2s', 
-              cursor: 'pointer' 
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'
-            }
+          <li
+            key={ticket.id}
+            className="user-account-ticket-item"
           >
-            <h3 style={{ margin: '0 0 10px', color: '#1e9ade' }}>{ticket.eventName}</h3>
-            <p style={{ margin: '0 0 5px', color: '#333' }}>Evento: {ticket.event}</p>
-            <p style={{ margin: '0 0 5px', color: '#333' }}>Precio: ${ticket.price}</p>
-            <p style={{ margin: '0 0 5px', color: '#333' }}>Zona: {ticket.zone}</p>
-            <p style={{ margin: '0 0 5px', color: '#333' }}>Asiento: {ticket.seat}</p>
-            <button 
-              onClick={() => handleToggleResale(ticket.id)} 
-              style={{ 
-                marginTop: '10px', 
-                padding: '10px 15px', 
-                backgroundColor: ticket.forResale ? '#d9534f' : '#6995bb', 
-                color: '#eefbff', 
-                border: 'none', 
-                borderRadius: '5px', 
-                cursor: 'pointer', 
-                fontWeight: 'bold' 
-              }}
+            <h3 className="user-account-ticket-title">{ticket.eventName}</h3>
+            <p className="user-account-ticket-info">Precio: ${ticket.price}</p>
+            <p className="user-account-ticket-info">Zona: {ticket.zone}</p>
+            <p className="user-account-ticket-info">Asiento: {ticket.seat}</p>
+            <button
+              onClick={() => handleToggleResale(ticket.id)}
+              className={`user-account-resale-btn${ticket.forResale ? ' resale' : ''}`}
             >
               {ticket.forResale ? 'Quitar de Reventa' : 'Poner en Reventa'}
+            </button>
+            <button
+              onClick={() => { setSelectedTicket(ticket); setIsModalOpen(true); }}
+              className="user-account-resale-btn"
+              style={{ marginLeft: '10px', background: '#1e9ade' }}
+            >
+              Ver boleto
             </button>
           </li>
         ))}
       </ul>
+      <TicketModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        ticket={selectedTicket}
+        userName={userInfo.name}
+      />
     </div>
   );
 }

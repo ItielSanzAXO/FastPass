@@ -1,0 +1,79 @@
+/* UserAccountPage.css */
+
+.user-account-container {
+  font-family: 'Disket Mono', monospace;
+  color: #1e9ade;
+  padding: 20px;
+}
+
+.user-account-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.user-account-profile {
+  display: flex;
+  align-items: center;
+}
+
+.user-account-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.user-account-logout-btn {
+  padding: 10px 20px;
+  background-color: #d9534f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.user-account-tickets-list {
+  list-style-type: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.user-account-ticket-item {
+  padding: 15px;
+  border: 2px solid #6995bb;
+  border-radius: 10px;
+  background-color: #eefbff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+
+.user-account-ticket-title {
+  margin: 0 0 10px;
+  color: #1e9ade;
+}
+
+.user-account-ticket-info {
+  margin: 0 0 5px;
+  color: #333;
+}
+
+.user-account-resale-btn {
+  margin-top: 10px;
+  padding: 10px 15px;
+  background-color: #6995bb;
+  color: #eefbff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.user-account-resale-btn.resale {
+  background-color: #d9534f;
+}
