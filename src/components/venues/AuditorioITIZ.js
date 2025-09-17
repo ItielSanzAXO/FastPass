@@ -95,6 +95,7 @@ function AuditorioITIZ({ event }) {
         batch.update(ticketRef, {
           isAvailable: false,
           ownerUid: user.uid,
+          forResale: false
         });
       });
 
@@ -116,16 +117,16 @@ function AuditorioITIZ({ event }) {
       setSelectedSeats([]);
       setShowPopup(false);
 
-      alert('Compra realizada con éxito.');
+  // alert('Compra realizada con éxito.');
     } catch (error) {
       console.error('Error al procesar la compra:', error);
 
       if (error.code === 'permission-denied') {
-        alert('No tienes permisos para realizar esta operación.');
+    // alert('No tienes permisos para realizar esta operación.');
       } else if (error.code === 'not-found') {
-        alert('Uno o más boletos seleccionados no existen.');
+    // alert('Uno o más boletos seleccionados no existen.');
       } else {
-        alert('Hubo un error al procesar la compra. Inténtalo de nuevo.');
+    // alert('Hubo un error al procesar la compra. Inténtalo de nuevo.');
       }
     }
   };
