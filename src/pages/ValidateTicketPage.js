@@ -1,26 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
 
 function ValidateTicketPage() {
-  const query = useQuery();
+  const { eventAndTicketId } = useParams();
   const [status, setStatus] = useState('checking');
   const [ticket, setTicket] = useState(null);
-  const ticketId = query.get('id');
+  // Separar eventId y ticketId
+  let eventId = null;
+  let ticketId = null;
+  if (eventAndTicketId) {
+    const parts = eventAndTicketId.split('-');
+    if (parts.length >= 2) {
+      eventId = parts[0];
+      ticketId = parts.slice(1).join('-');
+    }
+  }
 
   useEffect(() => {
     const validateTicket = async () => {
-      if (!ticketId) {
+      if (!ticketId || !eventId) {
         setStatus('no-id');
         return;
       }
       try {
+        // Aquí podrías validar que el ticket pertenezca al evento si lo necesitas
         const ticketRef = doc(db, 'tickets', ticketId);
         const ticketSnap = await getDoc(ticketRef);
         if (!ticketSnap.exists()) {
@@ -29,6 +36,10 @@ function ValidateTicketPage() {
         }
         const ticketData = ticketSnap.data();
         setTicket(ticketData);
+        if (ticketData.eventId !== eventId) {
+          setStatus('not-found');
+          return;
+        }
         if (ticketData.use === true) {
           setStatus('used');
         } else {
@@ -39,7 +50,7 @@ function ValidateTicketPage() {
       }
     };
     validateTicket();
-  }, [ticketId]);
+  }, [ticketId, eventId]);
 
   const handleApprove = async () => {
     if (!ticketId) return;
@@ -70,7 +81,8 @@ function ValidateTicketPage() {
       )}
       {ticket && (
         <div style={{ marginTop: 24, fontSize: 18 }}>
-          <p><strong>ID:</strong> {ticketId}</p>
+          <p><strong>ID Evento:</strong> {eventId}</p>
+          <p><strong>ID Ticket:</strong> {ticketId}</p>
           <p><strong>Zona:</strong> {ticket.zone}</p>
           <p><strong>Asiento:</strong> {ticket.seat}</p>
           <p><strong>Precio:</strong> ${ticket.price}</p>

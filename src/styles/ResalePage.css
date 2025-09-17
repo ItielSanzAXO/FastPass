@@ -1,0 +1,154 @@
+:root {
+  --c-primary: #1e9ade;
+  --c-primary-dk: #0b3c5d;
+  --c-primary-50: #eefbff;
+  --c-accent: #6995bb;
+  --c-bg: #f7fbff;
+  --c-card: #eaf6ff;
+  --c-shadow: #b6d6f7a0;
+  --c-shadow-hover: #b6d6f7cc;
+  --c-text: #1e9ade;
+  --c-text-subtle: #3a5a7a;
+  --c-price: #0b3c5d;
+}
+
+/* Contenedor */
+.resale-global-container {
+  font-family: 'Disket Mono', monospace;
+  color: var(--c-text);
+  padding: 32px 10vw;
+  background: var(--c-bg);
+  min-height: 100vh;
+}
+
+/* Título */
+.resale-title {
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+/* Lista */
+.resale-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.resale-empty {
+  text-align: center;
+  color: var(--c-accent);
+  font-size: 1.1rem;
+  margin-top: 40px;
+}
+
+/* Card */
+.resale-ticket-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  margin: 18px 0;
+  border: 1.5px solid var(--c-accent);
+  border-radius: 10px;
+  background: var(--c-card);
+  box-shadow: 0 2px 8px 0 var(--c-shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.resale-ticket-card:hover {
+  box-shadow: 0 4px 16px 0 var(--c-shadow-hover);
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .resale-ticket-card { transition: box-shadow 0.2s ease; }
+  .resale-ticket-card:hover { transform: none; }
+}
+
+/* Info */
+.resale-ticket-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* para ellipsis */
+}
+
+.resale-event-name {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--c-primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* nombres largos */
+}
+
+/* Zona / Fecha */
+.resale-zone-date {
+  display: flex;
+  flex-wrap: wrap;      /* permite salto en líneas pequeñas */
+  gap: 12px 18px;
+  font-size: 1rem;
+  color: var(--c-text-subtle);
+}
+.resale-zone { font-weight: 500; }
+.resale-date { font-style: italic; }
+
+/* Precio */
+.resale-price {
+  font-size: 1.1rem;
+  color: var(--c-price);
+  margin-top: 2px;
+}
+
+/* Botón comprar */
+.resale-buy-btn {
+  margin-left: 8px;
+  padding: 10px 18px;
+  background-color: var(--c-primary);
+  color: var(--c-primary-50);
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
+}
+.resale-buy-btn:hover {
+  background-color: var(--c-primary-dk);
+  color: #fff;
+}
+.resale-buy-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30,154,222,0.35);
+}
+
+/* Estado opcional deshabilitado */
+.resale-buy-btn.is-disabled,
+.resale-buy-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: var(--c-accent);
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .resale-global-container { padding: 24px 6vw; }
+  .resale-title { font-size: 1.9rem; }
+
+  .resale-ticket-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px;
+  }
+  .resale-buy-btn {
+    width: 100%;
+    margin-left: 0;
+  }
+}
