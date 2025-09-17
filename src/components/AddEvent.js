@@ -12,6 +12,8 @@ import {
   Timestamp,
   deleteDoc,
 } from "firebase/firestore";
+import { generateTicketsForEvent } from "../utils/generateTicketsForEvent.js";
+import { deleteTicketsForEvent } from "../utils/deleteTicketsForEvent.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -206,6 +208,8 @@ function AddEvent() {
     );
     if (!ok) return;
     try {
+      // Eliminar boletos antes de eliminar el evento
+      await deleteTicketsForEvent(id);
       await deleteDoc(doc(db, "events", id));
       setEvents((prev) => prev.filter((e) => e.id !== id));
       alert("Evento eliminado correctamente ✅");
@@ -359,6 +363,20 @@ function AddEvent() {
 
       const docId = form.name.trim().replace(/\s+/g, "-").toLowerCase();
       await setDoc(doc(db, "events", docId), payload);
+
+      // Generar boletos solo si NO es lanzamiento próximo
+      if (!isLaunch) {
+        await generateTicketsForEvent({
+          eventId: docId,
+          venueId: form.venueId,
+          pricing: {
+            general: Number(form.ticketPricing?.General || 0),
+            vip: Number(form.ticketPricing?.VIP || 0),
+          },
+          forResale: form.allowResale || false,
+        });
+      }
+
       setSuccess("Evento agregado correctamente ✅");
       setForm(initialState);
     } catch (err) {
