@@ -471,30 +471,6 @@ function AddEvent() {
                   error={error}
                   onCancel={() => setAction("")}
                 />
-                {showPopup && (
-                  <div className="add-event-popup-overlay">
-                    <div className="add-event-popup-modal">
-                      {popupMsg || "Evento agregado correctamente ✅"}
-                    </div>
-                  </div>
-                )}
-                {confirmDelete.show && (
-                  <div className="add-event-popup-overlay">
-                    <div className="add-event-popup-modal" style={{maxWidth: 340, textAlign: 'center'}}>
-                      <div style={{marginBottom: 18}}>
-                        ¿Seguro que quieres eliminar el evento <b>"{confirmDelete.name}"</b>?<br/>Esta acción no se puede deshacer.
-                      </div>
-                      <div style={{display: 'flex', gap: 12, justifyContent: 'center'}}>
-                        <button className="add-event-btn add-event-btn-red" onClick={confirmDeleteEvent}>
-                          Sí, eliminar
-                        </button>
-                        <button className="add-event-btn add-event-btn-gray" onClick={() => setConfirmDelete({ show: false, id: null, name: "" })}>
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -585,6 +561,31 @@ function AddEvent() {
                     </button>
                   </>
                 )}
+              </div>
+            )}
+            {/* Popups globales para confirmación y éxito/error */}
+            {showPopup && (
+              <div className="add-event-popup-overlay">
+                <div className="add-event-popup-modal">
+                  {popupMsg || "Evento agregado correctamente ✅"}
+                </div>
+              </div>
+            )}
+            {confirmDelete.show && (
+              <div className="add-event-popup-overlay">
+                <div className="add-event-popup-modal" style={{maxWidth: 340, textAlign: 'center'}}>
+                  <div style={{marginBottom: 18}}>
+                    ¿Seguro que quieres eliminar el evento <b>"{confirmDelete.name}"</b>?<br/>Esta acción no se puede deshacer.
+                  </div>
+                  <div style={{display: 'flex', gap: 12, justifyContent: 'center'}}>
+                    <button className="add-event-btn add-event-btn-red" onClick={confirmDeleteEvent}>
+                      Sí, eliminar
+                    </button>
+                    <button className="add-event-btn add-event-btn-gray" onClick={() => setConfirmDelete({ show: false, id: null, name: "" })}>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </>

@@ -1,15 +1,42 @@
 import { db } from "../firebaseConfig.js";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, writeBatch } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Reglas de generación de boletos por venue
 export async function generateTicketsForEvent({ eventId, venueId, pricing, forResale = false, eventName }) {
   if (!eventId || !venueId || !pricing) throw new Error("Faltan datos requeridos para generar boletos");
+
+  // Log de autenticación
+  const auth = getAuth();
+  const user = auth.currentUser;
+  console.log("[generateTicketsForEvent] Usuario autenticado:", user ? user.email : null, user ? user.uid : null);
 
   // Obtener prefijo de 4 letras del nombre del evento (mayúsculas, sin espacios ni caracteres especiales)
   let prefix = "EVNT";
   if (eventName && typeof eventName === "string") {
     prefix = eventName.replace(/[^a-zA-Z0-9]/g, "").substring(0, 4).toUpperCase().padEnd(4, "-");
   }
+
+  // Utilidad para hacer batch writes de hasta 500 tickets
+  async function batchWriteTickets(tickets) {
+    const batchSize = 500;
+    for (let i = 0; i < tickets.length; i += batchSize) {
+      const batch = writeBatch(db);
+      const chunk = tickets.slice(i, i + batchSize);
+      chunk.forEach(({ seat, ticketData }) => {
+        batch.set(doc(db, "tickets", seat), ticketData);
+      });
+      try {
+        await batch.commit();
+        console.log(`[generateTicketsForEvent] Batch de ${chunk.length} tickets guardado correctamente.`);
+      } catch (err) {
+        console.error(`[generateTicketsForEvent] Error al guardar batch:`, err);
+        throw err;
+      }
+    }
+  }
+
+  let tickets = [];
 
   if (venueId === "salon-51") {
     // 300 boletos generales
@@ -26,8 +53,9 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
         isAvailable: true,
         forResale,
       };
-      await setDoc(doc(db, "tickets", seat), ticketData);
+      tickets.push({ seat, ticketData });
     }
+    await batchWriteTickets(tickets);
   } else if (venueId === "duela-itiz") {
     // 50 VIP, 200 generales
     for (let i = 1; i <= 250; i++) {
@@ -44,8 +72,9 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
         isAvailable: true,
         forResale,
       };
-      await setDoc(doc(db, "tickets", seat), ticketData);
+      tickets.push({ seat, ticketData });
     }
+    await batchWriteTickets(tickets);
   } else if (venueId === "auditorio-itiz") {
     // Zonas y filas según tu lógica
     const zones = {
@@ -75,11 +104,12 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
             isAvailable: true,
             forResale,
           };
-          await setDoc(doc(db, "tickets", seat), ticketData);
+          tickets.push({ seat, ticketData });
           count++;
         }
       }
     }
+    await batchWriteTickets(tickets);
   } else {
     throw new Error("Venue no soportado para generación automática de boletos");
   }
