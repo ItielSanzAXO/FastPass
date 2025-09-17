@@ -11,11 +11,14 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
   const user = auth.currentUser;
   console.log("[generateTicketsForEvent] Usuario autenticado:", user ? user.email : null, user ? user.uid : null);
 
-  // Obtener prefijo de 4 letras del nombre del evento (mayúsculas, sin espacios ni caracteres especiales)
-  let prefix = "EVNT";
-  if (eventName && typeof eventName === "string") {
-    prefix = eventName.replace(/[^a-zA-Z0-9]/g, "").substring(0, 4).toUpperCase().padEnd(4, "-");
-  }
+  // Prefijos por venue
+  let venuePrefix = "GEN";
+  if (venueId === "auditorio-itiz") venuePrefix = "AUIT";
+  else if (venueId === "duela-itiz") venuePrefix = "DUIT";
+  else if (venueId === "salon-51") venuePrefix = "S51";
+
+  // Usar los primeros 4 caracteres del eventId como sufijo identificador
+  const eventSuffix = (eventId || "EVNT").replace(/[^a-zA-Z0-9]/g, "").substring(0, 4).toUpperCase().padEnd(4, "-");
 
   // Utilidad para hacer batch writes de hasta 500 tickets
   async function batchWriteTickets(tickets) {
@@ -23,8 +26,8 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
     for (let i = 0; i < tickets.length; i += batchSize) {
       const batch = writeBatch(db);
       const chunk = tickets.slice(i, i + batchSize);
-      chunk.forEach(({ seat, ticketData }) => {
-        batch.set(doc(db, "tickets", seat), ticketData);
+      chunk.forEach(({ id, ticketData }) => {
+        batch.set(doc(db, "tickets", id), ticketData);
       });
       try {
         await batch.commit();
@@ -41,7 +44,8 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
   if (venueId === "salon-51") {
     // 300 boletos generales
     for (let i = 1; i <= 300; i++) {
-      const seat = `${prefix}-${String(i).padStart(3, "0")}`;
+      const seat = String(i).padStart(3, "0");
+      const id = `${venuePrefix}${eventSuffix}-${seat}`;
       const ticketData = {
         eventId,
         venueId,
@@ -53,14 +57,15 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
         isAvailable: true,
         forResale,
       };
-      tickets.push({ seat, ticketData });
+      tickets.push({ id, ticketData });
     }
     await batchWriteTickets(tickets);
   } else if (venueId === "duela-itiz") {
     // 50 VIP, 200 generales
     for (let i = 1; i <= 250; i++) {
       const isVIP = i <= 50;
-      const seat = `${prefix}-${String(i).padStart(3, "0")}`;
+      const seat = String(i).padStart(3, "0");
+      const id = `${venuePrefix}${eventSuffix}-${seat}`;
       const ticketData = {
         eventId,
         venueId,
@@ -72,7 +77,7 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
         isAvailable: true,
         forResale,
       };
-      tickets.push({ seat, ticketData });
+      tickets.push({ id, ticketData });
     }
     await batchWriteTickets(tickets);
   } else if (venueId === "auditorio-itiz") {
@@ -86,13 +91,16 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
     };
     const VIP_ZONES = ["A", "B", "C"];
     const VIP_ROWS = [0, 1, 2, 3];
-    let count = 1;
     for (const [zone, rowLayout] of Object.entries(zones)) {
       for (let rowIndex = 0; rowIndex < rowLayout.length; rowIndex++) {
         const seatsInRow = rowLayout[rowIndex];
         for (let seatIndex = 0; seatIndex < seatsInRow; seatIndex++) {
+          // Fila y asiento en formato 2 dígitos
+          const fila = String(rowIndex + 1).padStart(2, "0");
+          const asiento = String(seatIndex + 1).padStart(2, "0");
+          const seat = `${zone}${fila}${asiento}`;
+          const id = `${venuePrefix}${eventSuffix}-${seat}`;
           const isVIP = VIP_ZONES.includes(zone) && VIP_ROWS.includes(rowIndex);
-          const seat = `${prefix}-${String(count).padStart(3, "0")}`;
           const ticketData = {
             eventId,
             venueId,
@@ -104,8 +112,7 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
             isAvailable: true,
             forResale,
           };
-          tickets.push({ seat, ticketData });
-          count++;
+          tickets.push({ id, ticketData });
         }
       }
     }

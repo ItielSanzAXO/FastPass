@@ -132,7 +132,15 @@ function AuditorioITIZ({ event }) {
 
   const renderZone = (zone) => {
     const zoneTickets = tickets.filter(ticket => ticket.zone === zone);
-    const rows = [...new Set(zoneTickets.map(ticket => ticket.seat.match(/^[A-Z](\d{2})/)[1]))].sort();
+    // Filtrar y advertir sobre asientos con formato inesperado
+    const rows = [...new Set(zoneTickets.map(ticket => {
+      const match = ticket.seat && ticket.seat.match(/^[A-Z](\d{2})/);
+      if (!match) {
+        console.warn(`Formato inesperado en seat: '${ticket.seat}' (ticket id: ${ticket.id})`);
+        return null;
+      }
+      return match[1];
+    }).filter(Boolean))].sort();
 
     return (
       <div className="zone" key={zone}>
@@ -140,7 +148,7 @@ function AuditorioITIZ({ event }) {
         {rows.map(row => (
           <div className="row" key={row}>
             {zoneTickets
-              .filter(ticket => ticket.seat.startsWith(`${zone}${row}`))
+              .filter(ticket => ticket.seat && ticket.seat.startsWith(`${zone}${row}`))
               .sort((a, b) => a.seat.localeCompare(b.seat))
               .map(ticket => {
                 console.log(`Asiento ${ticket.seat}: ${ticket.isAvailable ? 'Disponible' : 'No disponible'}`);
@@ -150,7 +158,7 @@ function AuditorioITIZ({ event }) {
                     className={`seat ${ticket.isAvailable ? 'available' : 'unavailable'} ${selectedSeats.includes(ticket.id) ? 'selected' : ''} ${ticket.type === 'VIP' ? 'vip' : 'general'}`}
                     onClick={() => ticket.isAvailable && toggleSeatSelection(ticket.id)}
                   >
-                    {ticket.seat.slice(-2)}
+                    {ticket.seat ? ticket.seat.slice(-2) : '?'}
                   </div>
                 );
               })}
@@ -167,6 +175,14 @@ function AuditorioITIZ({ event }) {
       </div>
     </div>
   );
+
+  // Mostrar el seat en vez del id en la selección
+  const selectedSeatLabels = selectedSeats
+    .map(id => {
+      const ticket = tickets.find(t => t.id === id);
+      return ticket ? ticket.seat : id;
+    })
+    .join(', ');
 
   return (
     <div className="flex flex-col lg:flex-row gap-6">
@@ -205,7 +221,7 @@ function AuditorioITIZ({ event }) {
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Tu Selección</h2>
           <div className="text-gray-500 italic mb-4">
-            {selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Aún no has seleccionado asientos'}
+            {selectedSeats.length > 0 ? selectedSeatLabels : 'Aún no has seleccionado asientos'}
           </div>
           <button
             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:bg-gray-400"
