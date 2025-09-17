@@ -20,6 +20,8 @@ function ValidateTicketPage() {
     }
   }
 
+  const [ownerName, setOwnerName] = useState(null);
+
   useEffect(() => {
     const validateTicket = async () => {
       if (!ticketId || !eventId) {
@@ -39,6 +41,25 @@ function ValidateTicketPage() {
         if (ticketData.eventId !== eventId) {
           setStatus('not-found');
           return;
+        }
+        // Validar si el boleto tiene dueño
+        if (!ticketData.ownerUid) {
+          setStatus('no-owner');
+          setOwnerName(null);
+          return;
+        }
+        // Buscar nombre del dueño si existe ownerUid
+        try {
+          const userRef = doc(db, 'users', ticketData.ownerUid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setOwnerName(userData.name || userData.displayName || ticketData.ownerUid);
+          } else {
+            setOwnerName(ticketData.ownerUid);
+          }
+        } catch {
+          setOwnerName(ticketData.ownerUid);
         }
         if (ticketData.use === true) {
           setStatus('used');
@@ -71,6 +92,7 @@ function ValidateTicketPage() {
       {status === 'not-found' && <p>Boleto no encontrado.</p>}
       {status === 'error' && <p>Ocurrió un error al validar el boleto.</p>}
       {status === 'used' && <p style={{ color: 'red', fontWeight: 'bold' }}>¡Este boleto ya fue usado!</p>}
+      {status === 'no-owner' && <p style={{ color: 'orange', fontWeight: 'bold' }}>Boleto no comprado</p>}
       {status === 'valid' && (
         <>
           <p style={{ color: 'green', fontWeight: 'bold' }}>¡Boleto válido!</p>
@@ -79,13 +101,14 @@ function ValidateTicketPage() {
           </button>
         </>
       )}
-      {ticket && (
+      {ticket && status !== 'no-owner' && (
         <div style={{ marginTop: 24, fontSize: 18 }}>
           <p><strong>ID Evento:</strong> {eventId}</p>
           <p><strong>ID Ticket:</strong> {ticketId}</p>
           <p><strong>Zona:</strong> {ticket.zone}</p>
           <p><strong>Asiento:</strong> {ticket.seat}</p>
           <p><strong>Precio:</strong> ${ticket.price}</p>
+          {ownerName && <p><strong>Dueño:</strong> {ownerName}</p>}
         </div>
       )}
     </div>
