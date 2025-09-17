@@ -72,6 +72,10 @@ function toTimestamp(input) {
 
 // --- COMPONENTE ---
 function AddEvent() {
+  // Popup para éxito y mensajes
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMsg, setPopupMsg] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, id: null, name: "" });
   // Sesión (para logs)
   const [user, setUser] = useState(null);
   useEffect(() => {
@@ -110,7 +114,7 @@ function AddEvent() {
 
   // Agregar
   const [form, setForm] = useState(initialState);
-  const [success, setSuccess] = useState("");
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -182,7 +186,12 @@ function AddEvent() {
       snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
       setEvents(list);
     })();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, action]);
+
+  // Permitir refrescar la lista manualmente desde el botón "Editar evento"
+  const handleShowEditList = () => {
+    setAction("edit");
+  };
 
   // --- Seleccionar evento a editar ---
   const handleEdit = (event) => {
@@ -202,20 +211,33 @@ function AddEvent() {
   };
 
   // --- Eliminar evento ---
-  const handleDelete = async (id, name) => {
-    const ok = window.confirm(
-      `¿Seguro que quieres eliminar el evento "${name}"? Esta acción no se puede deshacer.`
-    );
-    if (!ok) return;
+  // Mostrar popup de confirmación antes de eliminar
+  const handleDelete = (id, name) => {
+    setConfirmDelete({ show: true, id, name });
+  };
+
+  // Confirmar eliminación desde el popup
+  const confirmDeleteEvent = async () => {
+    const { id } = confirmDelete;
+    setConfirmDelete({ show: false, id: null, name: "" });
     try {
-      // Eliminar boletos antes de eliminar el evento
       await deleteTicketsForEvent(id);
       await deleteDoc(doc(db, "events", id));
       setEvents((prev) => prev.filter((e) => e.id !== id));
-      alert("Evento eliminado correctamente ✅");
+      setPopupMsg("Evento eliminado correctamente ✅");
+      setShowPopup(true);
       if (editId === id) setEditId(null);
+      setTimeout(() => {
+        setShowPopup(false);
+        setPopupMsg("");
+      }, 1500);
     } catch (err) {
-      alert("Error al eliminar evento: " + err.message);
+      setPopupMsg("Error al eliminar evento: " + err.message);
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+        setPopupMsg("");
+      }, 2000);
     }
   };
 
@@ -286,6 +308,11 @@ function AddEvent() {
       await setDoc(doc(db, "events", editId), payload, { merge: true });
       setEditSuccess("Evento editado correctamente ✅");
       setEditId(null);
+      // Recargar eventos después de guardar cambios
+      const snap = await getDocs(collection(db, "events"));
+      const list = [];
+      snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
+      setEvents(list);
     } catch (err) {
       setEditError("Error al editar evento: " + err.message);
     }
@@ -314,7 +341,7 @@ function AddEvent() {
   // --- Confirmar alta ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess("");
+  // setSuccess eliminado, ya no se usa
     setError("");
     setLoading(true);
 
@@ -325,12 +352,8 @@ function AddEvent() {
     }
 
     try {
-      const isLaunch =
-        form.isUpcomingLaunch === true
-          ? true
-          : window.confirm(
-              "¿Es un lanzamiento próximo? (Aceptar = Sí; se guardará solo Nombre, Venue e Imagen)"
-            );
+      // Usar solo el valor de la casilla para isUpcomingLaunch
+      const isLaunch = form.isUpcomingLaunch === true;
 
       let payload;
       if (isLaunch) {
@@ -377,8 +400,12 @@ function AddEvent() {
         });
       }
 
-      setSuccess("Evento agregado correctamente ✅");
       setForm(initialState);
+      setShowPopup(true); // Mostrar popup
+      setTimeout(() => {
+        setShowPopup(false);
+        setAction("edit"); // Mostrar la lista de eventos (grid)
+      }, 1500);
     } catch (err) {
       setError("Error al agregar evento: " + err.message);
     }
@@ -422,7 +449,7 @@ function AddEvent() {
                   </button>
                   <button
                     className="add-event-btn add-event-btn-blue"
-                    onClick={() => setAction("edit")}
+                    onClick={handleShowEditList}
                   >
                     Editar evento
                   </button>
@@ -440,10 +467,34 @@ function AddEvent() {
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
                   loading={loading}
-                  success={success}
+                  // success eliminado del render normal
                   error={error}
                   onCancel={() => setAction("")}
                 />
+                {showPopup && (
+                  <div className="add-event-popup-overlay">
+                    <div className="add-event-popup-modal">
+                      {popupMsg || "Evento agregado correctamente ✅"}
+                    </div>
+                  </div>
+                )}
+                {confirmDelete.show && (
+                  <div className="add-event-popup-overlay">
+                    <div className="add-event-popup-modal" style={{maxWidth: 340, textAlign: 'center'}}>
+                      <div style={{marginBottom: 18}}>
+                        ¿Seguro que quieres eliminar el evento <b>"{confirmDelete.name}"</b>?<br/>Esta acción no se puede deshacer.
+                      </div>
+                      <div style={{display: 'flex', gap: 12, justifyContent: 'center'}}>
+                        <button className="add-event-btn add-event-btn-red" onClick={confirmDeleteEvent}>
+                          Sí, eliminar
+                        </button>
+                        <button className="add-event-btn add-event-btn-gray" onClick={() => setConfirmDelete({ show: false, id: null, name: "" })}>
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
