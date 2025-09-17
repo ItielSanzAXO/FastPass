@@ -81,7 +81,7 @@ function App() {
               <Route path="/About" component={About} />
               <Route path="/Contact" component={Contact} />
               <Route path="/add-event" component={AddEvent} />
-              <Route path="/validate/:eventAndTicketId" component={ValidateTicketPage} />
+              <Route path="/validate/:eventId/:ticketId" component={ValidateTicketPage} />
             </Switch>
           </div>
           <Footer />

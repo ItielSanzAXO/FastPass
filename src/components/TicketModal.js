@@ -16,8 +16,8 @@ function formatDate(date) {
 function TicketModal({ isOpen, onClose, ticket, userName }) {
   if (!isOpen || !ticket) return null;
 
-  // URL del boleto con formato /validate/{eventId}-{ticketId}
-  const ticketUrl = `http://fastpass-91ef9.web.app/validate/${ticket.eventId}-${ticket.id}`;
+  // URL del boleto con formato /validate/{eventId}/{ticketId} (siempre separado por /)
+  const ticketUrl = `https://fastpass-91ef9.web.app/validate/${ticket.eventId}/${ticket.id}`;
 
   return (
     <div className="ticket-modal-overlay">

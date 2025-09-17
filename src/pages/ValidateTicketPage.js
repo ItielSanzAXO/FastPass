@@ -6,19 +6,10 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 
 function ValidateTicketPage() {
-  const { eventAndTicketId } = useParams();
+  const { eventId, ticketId } = useParams();
   const [status, setStatus] = useState('checking');
   const [ticket, setTicket] = useState(null);
-  // Separar eventId y ticketId
-  let eventId = null;
-  let ticketId = null;
-  if (eventAndTicketId) {
-    const parts = eventAndTicketId.split('-');
-    if (parts.length >= 2) {
-      eventId = parts[0];
-      ticketId = parts.slice(1).join('-');
-    }
-  }
+  // eventId y ticketId ya vienen separados por la URL
 
   const [ownerName, setOwnerName] = useState(null);
 
@@ -38,10 +29,7 @@ function ValidateTicketPage() {
         }
         const ticketData = ticketSnap.data();
         setTicket(ticketData);
-        if (ticketData.eventId !== eventId) {
-          setStatus('not-found');
-          return;
-        }
+  // Ya no validamos que el eventId de la URL coincida con el del ticket
         // Validar si el boleto tiene dueño
         if (!ticketData.ownerUid) {
           setStatus('no-owner');
