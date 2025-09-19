@@ -217,25 +217,35 @@ function UserAccountPage() {
         {userTickets.map(ticket => (
           <li
             key={ticket.id}
-            className="user-account-ticket-item"
+            className="user-account-ticket-item ticket-bg-image"
+            style={ticket.eventImageUrl ? {
+              backgroundImage: `linear-gradient(rgba(40,40,40,0.7), rgba(40,40,40,0.7)), url('${ticket.eventImageUrl}')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              color: '#fff',
+              position: 'relative'
+            } : {}}
           >
-            <h3 className="user-account-ticket-title">{ticket.eventName}</h3>
-            <p className="user-account-ticket-info">Precio: ${ticket.price}</p>
-            <p className="user-account-ticket-info">Zona: {ticket.zone}</p>
-            <p className="user-account-ticket-info">Asiento: {ticket.seat}</p>
-            <button
-              onClick={() => handleToggleResale(ticket.id)}
-              className={`user-account-resale-btn${ticket.forResale ? ' resale' : ''}`}
-            >
-              {ticket.forResale ? 'Quitar de Reventa' : 'Poner en Reventa'}
-            </button>
-            <button
-              onClick={() => { setSelectedTicket(ticket); setIsModalOpen(true); }}
-              className="user-account-resale-btn"
-              style={{ marginLeft: '10px', background: '#1e9ade' }}
-            >
-              Ver boleto
-            </button>
+            <div className="ticket-bg-overlay">
+              <h3 className="user-account-ticket-title">{ticket.eventName}</h3>
+              <p className="user-account-ticket-info">Precio: ${ticket.price}</p>
+              <p className="user-account-ticket-info">Zona: {ticket.zone}</p>
+              <p className="user-account-ticket-info">Asiento: {ticket.seat}</p>
+              <button
+                onClick={() => handleToggleResale(ticket.id)}
+                className={`user-account-resale-btn${ticket.forResale ? ' resale' : ''}`}
+              >
+                {ticket.forResale ? 'Quitar de Reventa' : 'Poner en Reventa'}
+              </button>
+              <button
+                onClick={() => { setSelectedTicket(ticket); setIsModalOpen(true); }}
+                className="user-account-resale-btn"
+                style={{ marginLeft: '10px', background: '#1e9ade' }}
+              >
+                Ver boleto
+              </button>
+            </div>
           </li>
         ))}
       </ul>
