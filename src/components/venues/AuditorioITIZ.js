@@ -244,6 +244,18 @@ function AuditorioITIZ({ event }) {
           selectedSeats={selectedSeats}
           onClose={() => setShowPopup(false)}
           onConfirm={confirmPurchase}
+          isFree={
+            // Si ambos precios son 0 o Gratis, o si el usuario solo selecciona asientos de zona gratis
+            (() => {
+              if (!event.ticketPricing) return false;
+              // Si todos los precios son 0
+              const allZero = Object.values(event.ticketPricing).every(p => p === 0 || p === 'Gratis');
+              if (allZero) return true;
+              // Si todos los asientos seleccionados son de zona gratis
+              const selectedTickets = tickets.filter(t => selectedSeats.includes(t.id));
+              return selectedTickets.length > 0 && selectedTickets.every(t => event.ticketPricing[t.type] === 0 || event.ticketPricing[t.type] === 'Gratis');
+            })()
+          }
         />
       )}
     </div>

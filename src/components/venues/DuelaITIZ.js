@@ -12,13 +12,15 @@ function formatFirebaseTimestamp(timestamp) {
   return format(date, 'dd/MM/yyyy HH:mm');
 }
 
+
 const DuelaITIZ = ({ event }) => {
   const { user } = useAuth();
   const [ticketCount, setTicketCount] = useState(0);
   const [selectedZone, setSelectedZone] = useState(null);
   const ticketLimit = event.ticketLimitPerUser || 3;
   const [showPayment, setShowPayment] = useState(false);
-  // const [loading, setLoading] = useState(false);
+  const [purchaseStatus, setPurchaseStatus] = useState(null); // 'success' | 'error' | null
+  const [purchaseError, setPurchaseError] = useState('');
 
   const increment = () => {
     if (ticketCount < ticketLimit) {
@@ -32,23 +34,38 @@ const DuelaITIZ = ({ event }) => {
     }
   };
 
-  // Lógica de compra real
+
   const handleConfirmPurchase = async () => {
-    if (!user?.uid || !selectedZone || ticketCount === 0) return;
-  // setLoading(true);
+    if (!user?.uid || !selectedZone || ticketCount === 0) {
+      setPurchaseStatus('error');
+      setPurchaseError('Faltan datos para la compra.');
+      return;
+    }
     try {
       // Buscar tickets disponibles en la zona seleccionada
       const ticketsRef = collection(db, 'tickets');
       const q = query(ticketsRef, where('eventId', '==', event.id), where('zone', '==', selectedZone), where('isAvailable', '==', true));
       const querySnapshot = await getDocs(q);
-      const availableTickets = querySnapshot.docs.filter(docSnap => docSnap.data().forResale !== false);
+  let availableTickets = querySnapshot.docs; // No filtrar por forResale
+      // Ordenar por seat numérico ascendente
+      availableTickets = availableTickets.sort((a, b) => {
+        const seatA = parseInt(a.data().seat.replace(/\D/g, ''));
+        const seatB = parseInt(b.data().seat.replace(/\D/g, ''));
+        return seatA - seatB;
+      });
       if (availableTickets.length < ticketCount) {
-        alert('No hay suficientes boletos disponibles en esta zona.');
-  // setLoading(false);
+        setPurchaseStatus('error');
+        setPurchaseError('No hay suficientes boletos disponibles en esta zona.');
         return;
       }
       // Tomar los primeros N tickets disponibles
       const ticketsToBuy = availableTickets.slice(0, ticketCount);
+      console.log('Boletos asignados al usuario:', ticketsToBuy.map(t => ({
+        id: t.id,
+        seat: t.data().seat,
+        zone: t.data().zone,
+        isAvailable: t.data().isAvailable
+      })));
       const batch = writeBatch(db);
       // Asegurar documento de usuario
       const userRef = doc(db, 'users', user.uid);
@@ -68,15 +85,15 @@ const DuelaITIZ = ({ event }) => {
         tickets: arrayUnion(...ticketsToBuy.map(t => t.id)),
       });
       await batch.commit();
-      setShowPayment(false);
+      setPurchaseStatus('success');
+      setPurchaseError('');
       setTicketCount(0);
       setSelectedZone(null);
-  // alert('¡Compra realizada!');
     } catch (error) {
-  // alert('Error al procesar la compra.');
+      setPurchaseStatus('error');
+      setPurchaseError('Ocurrió un error al procesar la compra.');
       console.error(error);
     }
-  // setLoading(false);
   };
 
   return (
@@ -84,8 +101,17 @@ const DuelaITIZ = ({ event }) => {
       {showPayment && (
         <PaymentPopup
           selectedSeats={[`${selectedZone} x${ticketCount}`]}
-          onClose={() => setShowPayment(false)}
+          onClose={() => {
+            setShowPayment(false);
+            setPurchaseStatus(null);
+            setPurchaseError('');
+          }}
           onConfirm={handleConfirmPurchase}
+          isFree={
+            (selectedZone && (event.ticketPricing?.[selectedZone] === 0 || event.ticketPricing?.[selectedZone] === 'Gratis'))
+          }
+          purchaseStatus={purchaseStatus}
+          errorMsg={purchaseError}
         />
       )}
       {/* Mapa de la Duela */}

@@ -37,11 +37,28 @@ const Salon51 = ({ event }) => {
     if (!user?.uid || !selectedZone || ticketCount === 0) return;
   // setLoading(true);
     try {
+      // Mostrar valores para depuración
+      console.log('event.id:', event.id);
+      console.log('selectedZone:', selectedZone);
       // Buscar tickets disponibles en la zona seleccionada
       const ticketsRef = collection(db, 'tickets');
       const q = query(ticketsRef, where('eventId', '==', event.id), where('zone', '==', selectedZone), where('isAvailable', '==', true));
       const querySnapshot = await getDocs(q);
-      const availableTickets = querySnapshot.docs.filter(docSnap => docSnap.data().forResale !== false);
+      let availableTickets = querySnapshot.docs.filter(docSnap => docSnap.data().forResale !== false);
+      console.log('Boletos encontrados:', availableTickets.map(doc => ({
+        id: doc.id,
+        eventId: doc.data().eventId,
+        zone: doc.data().zone,
+        isAvailable: doc.data().isAvailable,
+        forResale: doc.data().forResale,
+        seat: doc.data().seat
+      })));
+      // Ordenar por seat numérico ascendente
+      availableTickets = availableTickets.sort((a, b) => {
+        const seatA = parseInt(a.data().seat.replace(/\D/g, ''));
+        const seatB = parseInt(b.data().seat.replace(/\D/g, ''));
+        return seatA - seatB;
+      });
       if (availableTickets.length < ticketCount) {
         alert('No hay suficientes boletos disponibles en esta zona.');
   // setLoading(false);
@@ -86,6 +103,9 @@ const Salon51 = ({ event }) => {
           selectedSeats={[`${selectedZone} x${ticketCount}`]}
           onClose={() => setShowPayment(false)}
           onConfirm={handleConfirmPurchase}
+          isFree={
+            (selectedZone && (event.ticketPricing?.[selectedZone] === 0 || event.ticketPricing?.[selectedZone] === 'Gratis'))
+          }
         />
       )}
       {/* Mapa del Salón */}
