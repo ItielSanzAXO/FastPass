@@ -15,24 +15,16 @@ function UserAccountPage() {
   const history = useHistory();
 
   useEffect(() => {
-    const fetchFirebaseUserInfo = async () => {
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-
-      if (currentUser) {
-        setUserInfo({
-          name: currentUser.displayName || '',
-          profilePic: currentUser.photoURL || '',
-          uid: currentUser.uid, // Usar el UID de Firebase Authentication
-        });
-      } else {
-        console.error('No se encontró un usuario autenticado en Firebase.');
-        history.push('/login');
-      }
-    };
-
-    fetchFirebaseUserInfo();
-  }, [history]);
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      setUserInfo({
+        name: currentUser.displayName || '',
+        profilePic: currentUser.photoURL || '',
+        uid: currentUser.uid,
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchUserTickets = async () => {
@@ -188,7 +180,8 @@ function UserAccountPage() {
     try {
       await signOut(auth); // Cerrar sesión en Firebase
       localStorage.removeItem('googleAccessToken'); // Eliminar el token de acceso
-      history.push('/login'); // Redirigir a la página de inicio de sesión
+  // Reemplazar historial para que el back no regrese a /account tras logout
+  history.replace('/login');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }

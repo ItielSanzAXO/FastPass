@@ -1,0 +1,13 @@
+.event-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 12px;
+  color: #374151;
+}
+
+.event-loading p {
+  margin: 0;
+}

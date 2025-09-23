@@ -24,7 +24,7 @@ const globalStyles = {
 };
 
 function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const history = useHistory(); // Hook para redirección
   // ...existing code...
 
@@ -39,7 +39,7 @@ function LoginPage() {
           localStorage.setItem('googleAccessToken', token); // Guardar el token en localStorage
           login(result.user); // Guardar el usuario en el contexto
           console.log('Usuario autenticado tras redirección:', result.user);
-          history.push('/account'); // Redirigir a la página de cuenta
+          history.replace('/account'); // Reemplazar para evitar volver al login
         }
       } catch (error) {
         console.error('Error al manejar el resultado de la redirección:', error);
@@ -48,6 +48,13 @@ function LoginPage() {
 
     handleRedirectResult();
   }, [login, history]);
+
+  // Si ya hay sesión activa y no estamos cargando, redirigir fuera de /login
+  useEffect(() => {
+    if (!loading && user) {
+      history.replace('/account');
+    }
+  }, [user, loading, history]);
 
   // Login con Google
   const handleGoogleLogin = async () => {
@@ -60,7 +67,7 @@ function LoginPage() {
       localStorage.setItem('googleAccessToken', token); // Guardar el token en localStorage
       login(result.user); // Guardar el usuario en el contexto
       console.log('Usuario autenticado:', result.user);
-      history.push('/account'); // Redirigir a la página de cuenta
+      history.replace('/account'); // Reemplazar para evitar volver al login
     } catch (error) {
       console.error('Error durante la autenticación:', error);
     }

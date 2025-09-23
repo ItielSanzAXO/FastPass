@@ -6,6 +6,7 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // indica si estamos resolviendo la sesión inicial
 
   useEffect(() => {
     const auth = getAuth();
@@ -23,6 +24,8 @@ export function AuthProvider({ children }) {
           tickets: [],
         }, { merge: true }); // Crear o actualizar el documento del usuario
       }
+
+      setLoading(false); // Termina la carga inicial tras resolver el estado de auth
     });
 
     return () => unsubscribe(); // Limpiar el listener al desmontar
@@ -32,7 +35,7 @@ export function AuthProvider({ children }) {
   const logout = () => setUser(null);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -11,6 +11,8 @@ import ResalePage from './components/ResalePage.js';
 import LoginPage from './components/LoginPage.js';
 import UserAccountPage from './components/UserAccountPage.js';
 import Footer from './components/Footer.js'; // Importar el Footer
+import NotFound from './components/NotFound.js';
+import ProtectedRoute from './components/ProtectedRoute.js';
 import ValidateTicketPage from './pages/ValidateTicketPage.js';
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
@@ -76,12 +78,14 @@ function App() {
               <Route path="/events" component={EventsPage} />
               <Route path="/event/:eventId" component={EventDetail} />
               <Route path="/resale" component={ResalePage} />
-              <Route path="/account" component={UserAccountPage} />
+              <ProtectedRoute path="/account" component={UserAccountPage} />
               <Route path="/HelpPage" component={HelpPage} />
               <Route path="/About" component={About} />
               <Route path="/Contact" component={Contact} />
-              <Route path="/add-event" component={AddEvent} />
+              <ProtectedRoute path="/add-event" component={AddEvent} />
               <Route path="/validate/:eventId/:ticketId" component={ValidateTicketPage} />
+              {/* Ruta comodín para 404 - debe ir al final */}
+              <Route component={NotFound} />
             </Switch>
           </div>
           <Footer />

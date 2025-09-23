@@ -19,6 +19,7 @@ import {
   onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
+  signOut,
 } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 import "../styles/AddEvent.css";
@@ -121,14 +122,19 @@ function AddEvent() {
   const history = useHistory();
 
   // --- Cerrar sesión ---
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsLoggedIn(false);
     setLoginEmail("");
     setLoginPassword("");
     setLoginError("");
     setLoginAttempts(0);
-    const auth = getAuth();
-    auth.signOut();
+    try {
+      await signOut(getAuth());
+    } catch (e) {
+      console.warn("[AUTH] Error al cerrar sesión:", e?.message || e);
+    }
+    // Evitar volver con back al panel
+    history.replace("/");
   };
 
   // --- Login admin (Google + verificación en /admins por email) ---

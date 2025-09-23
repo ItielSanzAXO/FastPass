@@ -1,0 +1,65 @@
+/* Estilos básicos para la página 404 */
+.notfound-container {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.notfound-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  padding: 32px;
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+}
+
+.notfound-title {
+  font-size: 72px;
+  margin: 0 0 8px;
+  color: #111827;
+}
+
+.notfound-subtitle {
+  font-size: 20px;
+  margin: 0 0 12px;
+  color: #374151;
+}
+
+.notfound-text {
+  font-size: 16px;
+  color: #4b5563;
+  margin-bottom: 24px;
+}
+
+.notfound-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.notfound-button {
+  background-color: #111827;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.notfound-link {
+  color: #111827;
+  text-decoration: none;
+  padding: 10px 16px;
+}
+
+.notfound-button:hover {
+  background-color: #1f2937;
+}
+
+.notfound-link:hover {
+  text-decoration: underline;
+}
