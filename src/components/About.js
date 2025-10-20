@@ -7,7 +7,7 @@ const About = () => (
 			<div className="card">
 				<h1 className="card-title">Acerca de FastPass</h1>
 				<div className="card-subtitle">Proyecto escolar desarrollado por estudiantes del<br/> Instituto Tecnológico de Iztapalapa<br/>
-					Meli | ItielSanz | Ariel
+					Meli | ItielSanz | Ari
 				</div>
 				<p style={{ fontSize: '1.15rem', lineHeight: '1.7', marginBottom: '18px' }}>
 					<strong>FastPass</strong> es una boletera digital pensada para eventos sociales. Su objetivo es facilitar la compra, gestión y reventa de boletos de manera segura, rápida y eficiente, tanto para organizadores como para asistentes.
