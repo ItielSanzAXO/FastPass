@@ -6,6 +6,7 @@ const AccessibilityDropdown = ({ open, onClose }) => {
   const dropdownRef = useRef(null);
   const [darkMode, setDarkMode] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -39,6 +40,16 @@ const AccessibilityDropdown = ({ open, onClose }) => {
         document.documentElement.classList.add('high-contrast');
         document.body.classList.add('high-contrast');
       }
+      // cargar tamaño de letra
+      const savedFont = localStorage.getItem('fp_font_size');
+      const parsed = savedFont ? Number(savedFont) : null;
+      if (parsed && !Number.isNaN(parsed)) {
+        setFontSize(parsed);
+        document.documentElement.style.setProperty('--fp-font-size', `${parsed}px`);
+      } else {
+        // usar el valor por defecto (16px) en vez de referenciar fontSize aquí
+        document.documentElement.style.setProperty('--fp-font-size', `16px`);
+      }
     } catch (e) {
       // noop
     }
@@ -58,6 +69,18 @@ const AccessibilityDropdown = ({ open, onClose }) => {
         localStorage.setItem('fp_dark_mode', '0');
       }
     } catch (e) {
+      // noop
+    }
+  };
+
+  const handleFontSizeChange = (e) => {
+    const next = Number(e.target.value);
+    if (Number.isNaN(next)) return;
+    setFontSize(next);
+    try {
+      document.documentElement.style.setProperty('--fp-font-size', `${next}px`);
+      localStorage.setItem('fp_font_size', String(next));
+    } catch (err) {
       // noop
     }
   };
@@ -93,8 +116,17 @@ const AccessibilityDropdown = ({ open, onClose }) => {
           <input type="checkbox" checked={highContrast} onChange={toggleContrast} /> Contraste alto
         </label>
         <div className="slider-group">
-          <span>Tamaño de letra</span>
-          <input type="range" min="12" max="32" defaultValue="16" />
+          <label htmlFor="fp-font-size-range">Tamaño de letra: <strong>{fontSize}px</strong></label>
+          <input
+            id="fp-font-size-range"
+            type="range"
+            min="12"
+            max="24"
+            step="1"
+            value={fontSize}
+            onChange={handleFontSizeChange}
+            aria-label={`Tamaño de letra, actualmente ${fontSize} pixels`}
+          />
         </div>
         <label>
           <input type="checkbox" /> Escala de grises

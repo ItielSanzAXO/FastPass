@@ -7,6 +7,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  --fp-font-size: 16px; /* tamaño de letra por defecto, modificable desde la UI */
+}
+
+html {
+  font-size: var(--fp-font-size);
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
