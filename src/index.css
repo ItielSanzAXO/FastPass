@@ -161,3 +161,15 @@ body, body *:not(code):not(pre):not(kbd):not(samp) {
   font-family: var(--fp-font-family) !important;
 }
 
+.reading-highlight {
+  background: #ffd54f66; /* amarillo claro semitransparente */
+  outline: 2px solid #ffb30066;
+  transition: background 160ms ease;
+}
+#fp-reading-controls button {
+  background: transparent;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
