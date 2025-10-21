@@ -8,6 +8,7 @@ const AccessibilityDropdown = ({ open, onClose }) => {
   const [highContrast, setHighContrast] = useState(false);
   const [grayscale, setGrayscale] = useState(false);
   const [fontSize, setFontSize] = useState(16);
+  const [fontFamily, setFontFamily] = useState('original');
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -59,6 +60,22 @@ const AccessibilityDropdown = ({ open, onClose }) => {
         // usar el valor por defecto (16px) en vez de referenciar fontSize aquí
         document.documentElement.style.setProperty('--fp-font-size', `16px`);
       }
+      // cargar tipografía (aceptar 'system' histórico o nuevo alias 'original')
+      const savedFamily = localStorage.getItem('fp_font_family');
+      if (savedFamily) {
+        // normalizar valores antiguos
+        const normalized = savedFamily === 'system' ? 'original' : savedFamily;
+        setFontFamily(normalized);
+        // mapear alias a valores reales
+        const map = {
+          original: "'Disket Mono', monospace",
+          system: "'Disket Mono', monospace",
+          arial: 'Arial, Helvetica, sans-serif',
+          impact: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
+        };
+        const val = map[normalized] || map.original;
+        document.documentElement.style.setProperty('--fp-font-family', val);
+      }
     } catch (e) {
       // noop
     }
@@ -77,6 +94,24 @@ const AccessibilityDropdown = ({ open, onClose }) => {
         document.body.classList.remove('dark-mode');
         localStorage.setItem('fp_dark_mode', '0');
       }
+    } catch (e) {
+      // noop
+    }
+  };
+
+  const handleFontFamilyChange = (e) => {
+    const nextRaw = e.target.value;
+    const next = nextRaw === 'system' ? 'original' : nextRaw;
+    setFontFamily(next);
+    try {
+      localStorage.setItem('fp_font_family', next);
+      const map = {
+        original: "'Disket Mono', monospace",
+        arial: 'Arial, Helvetica, sans-serif',
+        impact: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif"
+      };
+      const val = map[next] || map.original;
+      document.documentElement.style.setProperty('--fp-font-family', val);
     } catch (e) {
       // noop
     }
@@ -159,12 +194,11 @@ const AccessibilityDropdown = ({ open, onClose }) => {
           <input type="checkbox" checked={grayscale} onChange={toggleGrayscale} /> Escala de grises
         </label>
         <div className="select-group">
-          <span>Tipografía</span>
-          <select>
-            <option>Sistema</option>
-            <option>Sans-serif</option>
-            <option>Serif</option>
-            <option>Monospace</option>
+          <label htmlFor="fp-font-family">Tipografía</label>
+          <select id="fp-font-family" value={fontFamily} onChange={handleFontFamilyChange}>
+            <option value="original">Por defecto</option>
+            <option value="arial">Arial</option>
+            <option value="impact">Impact</option>
           </select>
         </div>
         <button className="guide-btn">Alternar guía de lectura</button>
