@@ -15,6 +15,107 @@ html {
   font-size: var(--fp-font-size);
 }
 
+/* Paleta global basada en variables para facilitar modos (alto contraste, escala, etc.) */
+:root {
+  --surface: #ffffff;
+  --text: #111111;
+  --primary: #1a73e8; /* azul por defecto */
+  --primary-contrast: #ffffff;
+  --muted: #6b6b6b;
+}
+
+/* Modo escala de grises: re-asigna variables a tonos grises (mejor rendimiento que filter en toda la página) */
+html.grayscale,
+body.grayscale {
+  --surface: #f5f5f5;
+  --text: #111111;
+  --primary: #9e9e9e; /* color primario desaturado */
+  --primary-contrast: #000000;
+  --muted: #9e9e9e;
+}
+
+/* Desaturar imágenes de cards cuando el modo grayscale esté activo */
+/* Desaturar imágenes en selectores comunes cuando el modo grayscale esté activo */
+html.grayscale .card img:not(.no-desaturate),
+body.grayscale .card img:not(.no-desaturate),
+html.grayscale .events-list img:not(.no-desaturate),
+body.grayscale .events-list img:not(.no-desaturate),
+html.grayscale .event-card img:not(.no-desaturate),
+body.grayscale .event-card img:not(.no-desaturate),
+html.grayscale img.card-image:not(.no-desaturate),
+body.grayscale img.card-image:not(.no-desaturate),
+html.grayscale .gallery img:not(.no-desaturate),
+body.grayscale .gallery img:not(.no-desaturate) {
+  filter: grayscale(100%) saturate(0%) !important;
+  transition: filter 200ms ease;
+  will-change: filter;
+}
+
+/* También cubrir carrusel/hero/banner y sección de usuario */
+html.grayscale .hero img:not(.no-desaturate),
+body.grayscale .hero img:not(.no-desaturate),
+html.grayscale .carousel img:not(.no-desaturate),
+body.grayscale .carousel img:not(.no-desaturate),
+html.grayscale .home-carousel img:not(.no-desaturate),
+body.grayscale .home-carousel img:not(.no-desaturate),
+html.grayscale .carousel-slide img:not(.no-desaturate),
+body.grayscale .carousel-slide img:not(.no-desaturate),
+html.grayscale .homepage-carousel img:not(.no-desaturate),
+body.grayscale .homepage-carousel img:not(.no-desaturate),
+html.grayscale .banner img:not(.no-desaturate),
+body.grayscale .banner img:not(.no-desaturate),
+html.grayscale .user-account img:not(.no-desaturate),
+body.grayscale .user-account img:not(.no-desaturate),
+html.grayscale img.ticket-bg-image:not(.no-desaturate),
+body.grayscale img.ticket-bg-image:not(.no-desaturate),
+html.grayscale li.user-account-ticket-item.ticket-bg-image:not(.no-desaturate),
+body.grayscale li.user-account-ticket-item.ticket-bg-image:not(.no-desaturate) {
+  filter: grayscale(100%) saturate(0%) !important;
+  transition: filter 200ms ease;
+  will-change: filter;
+}
+
+/* Si usas background-image en contenedores comunes */
+html.grayscale .card-bg:not(.no-desaturate),
+body.grayscale .card-bg:not(.no-desaturate),
+html.grayscale .event-bg:not(.no-desaturate),
+body.grayscale .event-bg:not(.no-desaturate),
+html.grayscale .poster-bg:not(.no-desaturate),
+body.grayscale .poster-bg:not(.no-desaturate) {
+  filter: grayscale(100%) saturate(0%) !important;
+}
+
+/* Desaturar background-image aplicado directamente en li.event-card (hero/cards) */
+html.grayscale .event-card,
+body.grayscale .event-card {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+html.grayscale .event-card::before,
+body.grayscale .event-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(100%) saturate(0%) !important;
+  z-index: 0;
+  pointer-events: none;
+}
+
+html.grayscale .event-card > *,
+body.grayscale .event-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Excepción visual para elementos que no deben perder color (logos, marcas) */
+.no-desaturate {
+  filter: none !important;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

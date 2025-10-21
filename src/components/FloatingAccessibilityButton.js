@@ -6,6 +6,7 @@ const AccessibilityDropdown = ({ open, onClose }) => {
   const dropdownRef = useRef(null);
   const [darkMode, setDarkMode] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [grayscale, setGrayscale] = useState(false);
   const [fontSize, setFontSize] = useState(16);
 
   useEffect(() => {
@@ -40,6 +41,14 @@ const AccessibilityDropdown = ({ open, onClose }) => {
         document.documentElement.classList.add('high-contrast');
         document.body.classList.add('high-contrast');
       }
+      // cargar escala de grises
+      const savedGray = localStorage.getItem('fp_grayscale');
+      const isGray = savedGray === '1';
+      setGrayscale(isGray);
+      if (isGray) {
+        document.documentElement.classList.add('grayscale');
+        document.body.classList.add('grayscale');
+      }
       // cargar tamaño de letra
       const savedFont = localStorage.getItem('fp_font_size');
       const parsed = savedFont ? Number(savedFont) : null;
@@ -67,6 +76,24 @@ const AccessibilityDropdown = ({ open, onClose }) => {
         document.documentElement.classList.remove('dark-mode');
         document.body.classList.remove('dark-mode');
         localStorage.setItem('fp_dark_mode', '0');
+      }
+    } catch (e) {
+      // noop
+    }
+  };
+
+  const toggleGrayscale = () => {
+    const next = !grayscale;
+    setGrayscale(next);
+    try {
+      if (next) {
+        document.documentElement.classList.add('grayscale');
+        document.body.classList.add('grayscale');
+        localStorage.setItem('fp_grayscale', '1');
+      } else {
+        document.documentElement.classList.remove('grayscale');
+        document.body.classList.remove('grayscale');
+        localStorage.setItem('fp_grayscale', '0');
       }
     } catch (e) {
       // noop
@@ -129,7 +156,7 @@ const AccessibilityDropdown = ({ open, onClose }) => {
           />
         </div>
         <label>
-          <input type="checkbox" /> Escala de grises
+          <input type="checkbox" checked={grayscale} onChange={toggleGrayscale} /> Escala de grises
         </label>
         <div className="select-group">
           <span>Tipografía</span>
