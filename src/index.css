@@ -15,6 +15,16 @@ html {
   font-size: var(--fp-font-size);
 }
 
+/* Variable para la tipografía seleccionable por el usuario */
+:root {
+  --fp-font-family: 'Disket Mono', monospace; /* valor por defecto = "Por defecto (Disket Mono)" */
+}
+
+/* Aplicar la variable globalmente */
+body {
+  font-family: var(--fp-font-family);
+}
+
 /* Paleta global basada en variables para facilitar modos (alto contraste, escala, etc.) */
 :root {
   --surface: #ffffff;
@@ -136,3 +146,18 @@ html, body {
 main {
   flex: 1;
 }
+
+/* ==========================
+   Aplicar tipografía seleccionada
+   ==========================
+   Muchas hojas locales establecen `font-family` de forma explícita
+   (por ejemplo 'Disket Mono' en Navigation.css). Para asegurarnos de
+   que la elección del usuario (guardada en --fp-font-family) se aplique
+   a la interfaz, añadimos una regla de mayor prioridad que cubre
+   la mayoría de elementos, pero excluye bloques de código/pre para
+   no romper el monospace en snippets.
+*/
+body, body *:not(code):not(pre):not(kbd):not(samp) {
+  font-family: var(--fp-font-family) !important;
+}
+
