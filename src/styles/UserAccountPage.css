@@ -2,7 +2,7 @@
 
 .user-account-container {
   font-family: 'Disket Mono', monospace;
-  color: #1e9ade;
+  color: var(--text);
   padding: 20px;
 }
 
@@ -27,8 +27,8 @@
 
 .user-account-logout-btn {
   padding: 10px 20px;
-  background-color: #d9534f;
-  color: #fff;
+  background-color: var(--danger);
+  color: var(--primary-contrast);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -44,42 +44,66 @@
 
 .user-account-ticket-item {
   padding: 15px;
-  border: 2px solid #6995bb;
+  border: 2px solid color-mix(in srgb, var(--surface) 70%, var(--muted) 30%);
   border-radius: 10px;
-  background-color: #eefbff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* keep a slight surface tint but don't fully obscure background images */
+  background-color: color-mix(in srgb, var(--surface) 96%, black 4%);
+  box-shadow: 0 6px 12px color-mix(in srgb, black 10%, transparent 90%);
   transition: transform 0.2s;
   cursor: pointer;
   overflow: hidden;
   position: relative;
 }
 
+.user-account-ticket-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  /* softer overlay so images remain visible, especially in dark mode */
+  background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.06));
+}
+
 .ticket-bg-image {
-  background-blend-mode: multiply;
+  /* avoid heavy multiply blending that darkens images in dark themes */
+  background-blend-mode: normal;
+}
+
+/* Dark-mode tweaks: make cards more transparent so background images show */
+.dark-mode .user-account-ticket-item {
+  background-color: transparent;
+}
+
+.dark-mode .user-account-ticket-item::before {
+  background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.04));
 }
 
 .ticket-bg-overlay {
   position: relative;
   z-index: 2;
-  color: #fff;
+  color: var(--primary-contrast);
 }
 
 
 .user-account-ticket-title {
   margin: 0 0 10px;
-  color: #1e9ade;
+  color: var(--card-text, var(--primary-contrast));
+  text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  font-size: 1.15rem;
+
 }
 
 .user-account-ticket-info {
   margin: 0 0 5px;
-  color: #fff !important;
+  color: color-mix(in srgb, var(--card-text, var(--primary-contrast, #fff)) 80%, var(--muted, #9aa) 20%);
 }
 
 .user-account-resale-btn {
   margin-top: 10px;
   padding: 10px 15px;
-  background-color: #6995bb;
-  color: #eefbff;
+  background-color: var(--primary);
+  color: var(--primary-contrast);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -87,5 +111,16 @@
 }
 
 .user-account-resale-btn.resale {
-  background-color: #d9534f;
+  background-color: var(--danger);
+}
+
+.user-account-resale-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary, #1e9ade) 30%, transparent 70%);
+  border-radius: 6px;
+}
+
+/* Force white text inside ticket items */
+.user-account-ticket-item, .user-account-ticket-item * {
+  color: var(--card-text, #fff) !important;
 }

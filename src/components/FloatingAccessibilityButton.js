@@ -2,8 +2,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './FloatingAccessibilityButton.css';
 
-const AccessibilityDropdown = ({ open, onClose }) => {
+  const AccessibilityDropdown = ({ open, onClose }) => {
   const dropdownRef = useRef(null);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -19,6 +20,36 @@ const AccessibilityDropdown = ({ open, onClose }) => {
     };
   }, [open, onClose]);
 
+  useEffect(() => {
+    // Leer preferencia inicial de localStorage
+    try {
+      const saved = localStorage.getItem('fp_dark_mode');
+      const isDark = saved === '1';
+      setDarkMode(isDark);
+      if (isDark) document.documentElement.classList.add('dark-mode');
+    } catch (e) {
+      // noop
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    try {
+      if (next) {
+        document.documentElement.classList.add('dark-mode');
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('fp_dark_mode', '1');
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('fp_dark_mode', '0');
+      }
+    } catch (e) {
+      // noop
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -26,7 +57,7 @@ const AccessibilityDropdown = ({ open, onClose }) => {
       <h2>Accesibilidad</h2>
       <div className="accessibility-options">
         <label>
-          <input type="checkbox" /> Modo nocturno
+          <input type="checkbox" checked={darkMode} onChange={toggleDarkMode} /> Modo nocturno
         </label>
         <label>
           <input type="checkbox" /> Contraste alto

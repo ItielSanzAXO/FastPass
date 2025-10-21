@@ -16,7 +16,7 @@ import ProtectedRoute from './components/ProtectedRoute.js';
 import ValidateTicketPage from './pages/ValidateTicketPage.js';
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
-import logo from './assets/FastPassBG.png'; // Importar el logo
+import logo from './assets/FastPassDM.png'; // Importar el logo para modo oscuro
 import FloatingAccessibilityButton from './components/FloatingAccessibilityButton.js';
 import './App.css'; // Importar los estilos de la aplicación
 

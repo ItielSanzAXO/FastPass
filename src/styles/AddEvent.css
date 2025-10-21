@@ -13,19 +13,19 @@
 }
 
 .add-event-popup-modal {
-  background: #fff;
+  background: var(--surface);
   padding: 2rem 3rem;
   border-radius: 12px;
   box-shadow: 0 2px 16px #0003;
   font-size: 22px;
-  color: #1a7f37;
+  color: var(--primary);
   font-weight: 600;
 }
 /* Botón cerrar sesión admin */
 .add-event-logout-btn {
-  background: #fff;
-  color: #1e9ade;
-  border: 1.5px solid #1e9ade;
+  background: var(--surface);
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
   border-radius: 8px;
   padding: 8px 18px;
   font-weight: 700;
@@ -36,9 +36,9 @@
   transition: background 0.2s, color 0.2s, border 0.2s;
 }
 .add-event-logout-btn:hover {
-  background: #1e9ade;
-  color: #fff;
-  border: 1.5px solid #1769aa;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border: 1.5px solid color-mix(in srgb, var(--primary) 80%, black 20%);
 }
 
 .add-event-form-section {
@@ -63,8 +63,8 @@
 }
 
 .add-event-card {
-  background: #f7f7fa;
-  border: 1px solid #e0e0e0;
+  background: var(--bg);
+  border: 1px solid color-mix(in srgb, var(--surface) 80%, black 20%);
   border-radius: 8px;
   box-shadow: none;
   padding: 18px 16px 14px 16px;
@@ -83,7 +83,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  color: #fff;
+  color: var(--primary-contrast);
   border-color: rgba(255,255,255,0.25);
   min-height: 180px; /* ajusta a gusto (220-260px también se ve bien) */
 }
@@ -101,16 +101,16 @@
 }
 
 /* Texto sobre imagen */
-.add-event-card.has-bg .add-event-card-title { color: #fff; }
-.add-event-card.has-bg .add-event-card-date { color: #f1f1f1; }
+.add-event-card.has-bg .add-event-card-title { color: var(--primary-contrast); }
+.add-event-card.has-bg .add-event-card-date { color: color-mix(in srgb, var(--primary-contrast) 80%, black 20%); }
 .add-event-card.has-bg .add-event-badge {
-  background: rgba(255, 243, 205, 0.9);
-  color: #7a5a00;
+  background: color-mix(in srgb, var(--surface) 90%, var(--primary) 10%);
+  color: var(--muted);
 }
 
 /* Mejora hover de botones sobre imagen */
-.add-event-card.has-bg .add-event-btn-blue:hover { background: #145c9c; }
-.add-event-card.has-bg .add-event-btn-red:hover { background: #b01b28; }
+.add-event-card.has-bg .add-event-btn-blue:hover { background: color-mix(in srgb, var(--primary) 80%, black 20%); }
+.add-event-card.has-bg .add-event-btn-red:hover { background: color-mix(in srgb, var(--danger) 80%, black 20%); }
 
 /* ----- Header de la card ----- */
 .add-event-card-header {
@@ -126,7 +126,7 @@
 /* Fecha */
 .add-event-card-date {
   font-size: 1em;
-  color: #444;
+  color: var(--muted);
   margin-bottom: 18px;
 }
 
@@ -139,8 +139,8 @@
 
 /* Botón editar de las cards (estilo legacy, sigue funcionando) */
 .add-event-card-edit {
-  background: #2196f3;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-contrast);
   border: none;
   border-radius: 7px;
   padding: 10px 0;
@@ -156,8 +156,8 @@
   justify-content: center;
 }
 .add-event-card-edit:hover {
-  background: #2196f3;
-  color: #fff;
+  background: color-mix(in srgb, var(--primary) 80%, black 20%);
+  color: var(--primary-contrast);
   box-shadow: none;
   transform: none;
 }
@@ -165,7 +165,7 @@
 /* Layout general */
 .add-event-main-bg {
   min-height: 100vh;
-  background: #f3f6fa;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,7 +173,7 @@
 }
 
 .add-event-card-central {
-  background: #fff;
+  background: var(--surface);
   border-radius: 18px;
   box-shadow: 0 4px 32px rgba(0,0,0,0.10);
   padding: 32px 12px 24px 12px;
@@ -191,7 +191,7 @@
   text-align: center;
   margin-bottom: 32px;
   letter-spacing: 2px;
-  color: #222;
+  color: var(--text);
 }
 
 /* Formulario */
@@ -214,16 +214,16 @@
 .add-event-form-row label {
   font-size: 1rem;
   font-weight: 500;
-  color: #444;
+  color: var(--muted);
   margin-bottom: 2px;
 }
 .add-event-form input,
 .add-event-form select {
   padding: 10px 12px;
-  border: 1.5px solid #e0e0e0;
+  border: 1.5px solid var(--muted-2);
   border-radius: 7px;
   font-size: 1rem;
-  background: #f7f7fa;
+  background: var(--bg);
   outline: none;
   transition: border 0.2s;
   width: 100%;
@@ -232,7 +232,7 @@
 }
 .add-event-form input:focus,
 .add-event-form select:focus {
-  border-color: #2196f3;
+  border-color: var(--primary);
 }
 
 /* Botones */
@@ -250,48 +250,48 @@
   transition: background 0.2s, color 0.2s, border 0.2s;
 }
 .add-event-btn-blue {
-  background: #2196f3;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-contrast);
 }
 .add-event-btn-blue:hover {
-  background: #1769aa;
+  background: color-mix(in srgb, var(--primary) 80%, black 20%);
 }
 .add-event-btn-green {
-  background: #43b581;
-  color: #fff;
+  background: var(--success);
+  color: var(--primary-contrast);
 }
 .add-event-btn-green:hover {
-  background: #2e8b57;
+  background: color-mix(in srgb, var(--success) 80%, black 20%);
 }
 .add-event-btn-gray {
-  background: #e0e0e0;
-  color: #222;
+  background: var(--muted-2);
+  color: var(--text);
 }
 .add-event-btn-gray:hover {
-  background: #bdbdbd;
+  background: color-mix(in srgb, var(--muted-2) 80%, black 20%);
 }
 /* Botón rojo eliminar */
 .add-event-btn-red {
-  background: #e63946;
-  color: #fff;
+  background: var(--danger);
+  color: var(--primary-contrast);
 }
 .add-event-btn-red:hover {
-  background: #c71f2d;
-  color: #fff;
+  background: color-mix(in srgb, var(--danger) 80%, black 20%);
+  color: var(--primary-contrast);
 }
 
 /* Mensajes */
 .add-event-error {
-  color: #d32f2f;
-  background: #fff0f0;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface) 90%);
   border-radius: 6px;
   padding: 8px 12px;
   margin-top: 6px;
   text-align: center;
 }
 .add-event-success {
-  color: #388e3c;
-  background: #f0fff0;
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, var(--surface) 90%);
   border-radius: 6px;
   padding: 8px 12px;
   margin-top: 6px;
@@ -300,8 +300,8 @@
 
 /* Badge “Lanzamiento próximo” */
 .add-event-badge {
-  background: #fff3cd;
-  color: #7a5a00;
+  background: color-mix(in srgb, var(--surface) 90%, var(--primary) 10%);
+  color: var(--muted);
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 0.9em;

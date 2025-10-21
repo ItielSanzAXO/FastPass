@@ -3,8 +3,8 @@
   bottom: 32px;
   right: 32px;
   z-index: 1000;
-  background: #1976d2;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-contrast);
   border: none;
   border-radius: 50%;
   width: 56px;
@@ -27,7 +27,7 @@
 }
 }
 .floating-accessibility-btn:hover {
-  background: #1565c0;
+  background: color-mix(in srgb, var(--primary) 70%, black 30%);
 }
 
 .accessibility-dropdown {
@@ -35,20 +35,20 @@
   bottom: 100px;
   right: 32px;
   z-index: 1100;
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   padding: 32px 24px 24px 24px;
   min-width: 320px;
   max-width: 90vw;
-  color: #222;
+  color: var(--text);
   font-family: inherit;
 }
 .accessibility-dropdown h2 {
   margin-top: 0;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #1976d2;
+  color: var(--primary);
 }
 .accessibility-options {
   margin-bottom: 16px;
@@ -65,8 +65,8 @@
   margin-bottom: 10px;
 }
 .guide-btn {
-  background: #1976d2;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-contrast);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -74,5 +74,5 @@
   margin-bottom: 10px;
 }
 .guide-btn:hover {
-  background: #1565c0;
+  background: color-mix(in srgb, var(--primary) 70%, black 30%);
 }

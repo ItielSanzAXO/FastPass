@@ -1,9 +1,39 @@
-/* Global Styles */
+/* Global Styles using CSS variables for easy theming */
+:root {
+  --bg: #f9f9f9;
+  --text: #333333;
+  --muted: #666666;
+  --surface: #ffffff;
+  --primary: #1976d2;
+  --primary-contrast: #ffffff;
+  --card-text: #ffffff; /* texto dentro de cards: blanco por defecto */
+  --success: #43b581;
+  --danger: #e63946;
+  --muted-2: #e0e0e0;
+  --header-bg: rgba(255,255,255,0.486);
+  --footer-bg: #222222;
+  --footer-text: #ffffff;
+}
+
+/* Dark mode overrides */
+.html.dark-mode, html.dark-mode, body.dark-mode, .dark-mode {
+  --bg: #0f1720;
+  --text: #e6eef8;
+  --muted: #a9c6dd;
+  --surface: #0a1117;
+  --primary: #8bd0ff;
+  --primary-contrast: #04263a;
+  --card-text: #ffffff; /* forzar blanco en modo oscuro también */
+  --header-bg: rgba(8,30,46,0.6);
+  --footer-bg: #06070a;
+  --footer-text: #cfe7ff;
+}
+
 body {
   font-family: 'Disket Mono', monospace;
   line-height: 1.6;
-  color: #333;
-  background-color: #f9f9f9;
+  color: var(--text);
+  background-color: var(--bg);
   margin: 0;
   padding: 0;
 }
@@ -14,13 +44,14 @@ html, body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Disket Mono', monospace;
-  color: #222;
+  color: var(--text);
   margin-bottom: 1rem;
 }
 
 p {
   font-family: 'Disket Mono', monospace;
   margin-bottom: 1rem;
+  color: var(--muted);
 }
 
 button, input, textarea {
@@ -58,24 +89,24 @@ button, input, textarea {
 }
 
 .App-header {
-    background-color: rgba(255, 255, 255, 0.486); /* Blanco transparente */
+    background-color: var(--header-bg);
     position: fixed; /* Mantener fijo */
     top: 5px;
     width: 100%;
     z-index: 1000; /* Asegurar que esté por encima de otros elementos */
-    color: #006bff; /* Color secundario */
+    color: var(--primary);
     padding: 0;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--primary);
 }
 
 footer {
-  background-color: #222;
-  color: #fff;
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
   text-align: center;
   padding: 1rem 0;
 }

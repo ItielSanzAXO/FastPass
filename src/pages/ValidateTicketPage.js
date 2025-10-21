@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebaseConfig.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import './ValidateTicketPage.css';
 
 
 
@@ -73,18 +74,18 @@ function ValidateTicketPage() {
   };
 
   return (
-    <div style={{ padding: 32, fontFamily: 'Disket Mono, monospace', textAlign: 'center' }}>
+    <div className="validate-container">
       <h1>Validación de Boleto</h1>
       {status === 'checking' && <p>Verificando boleto...</p>}
       {status === 'no-id' && <p>No se proporcionó un ID de boleto.</p>}
       {status === 'not-found' && <p>Boleto no encontrado.</p>}
       {status === 'error' && <p>Ocurrió un error al validar el boleto.</p>}
-      {status === 'used' && <p style={{ color: 'red', fontWeight: 'bold' }}>¡Este boleto ya fue usado!</p>}
-      {status === 'no-owner' && <p style={{ color: 'orange', fontWeight: 'bold' }}>Boleto no comprado</p>}
+      {status === 'used' && <p className="validate-alert-danger">¡Este boleto ya fue usado!</p>}
+      {status === 'no-owner' && <p className="validate-alert-warning">Boleto no comprado</p>}
       {status === 'valid' && (
         <>
-          <p style={{ color: 'green', fontWeight: 'bold' }}>¡Boleto válido!</p>
-          <button onClick={handleApprove} style={{ padding: '12px 24px', fontSize: 18, background: '#1e9ade', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+          <p className="validate-alert-success">¡Boleto válido!</p>
+          <button onClick={handleApprove} className="validate-button">
             Aprobar acceso
           </button>
         </>
