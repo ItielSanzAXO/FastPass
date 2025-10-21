@@ -76,3 +76,39 @@
 .guide-btn:hover {
   background: color-mix(in srgb, var(--primary) 70%, black 30%);
 }
+
+/* High contrast mode */
+:root.high-contrast,
+body.high-contrast {
+  --surface: #000000;
+  --text: #ffffff;
+  --primary: #ffff00; /* amarillo para botones */
+  --primary-contrast: #000000;
+}
+
+/* For sites that add the class on html or body */
+.high-contrast .accessibility-dropdown {
+  background: #000;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.high-contrast .floating-accessibility-btn {
+  background: #ffff00;
+  color: #000;
+  box-shadow: none;
+}
+
+.high-contrast a,
+.high-contrast button,
+.high-contrast input,
+.high-contrast select {
+  border-color: #fff;
+  color: #fff;
+}
+
+/* Ensure focus outlines are visible */
+.high-contrast :focus {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}

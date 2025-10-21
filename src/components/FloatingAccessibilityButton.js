@@ -2,9 +2,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './FloatingAccessibilityButton.css';
 
-  const AccessibilityDropdown = ({ open, onClose }) => {
+const AccessibilityDropdown = ({ open, onClose }) => {
   const dropdownRef = useRef(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -21,12 +22,23 @@ import './FloatingAccessibilityButton.css';
   }, [open, onClose]);
 
   useEffect(() => {
-    // Leer preferencia inicial de localStorage
+    // Leer preferencias iniciales de localStorage
     try {
-      const saved = localStorage.getItem('fp_dark_mode');
-      const isDark = saved === '1';
+      const savedDark = localStorage.getItem('fp_dark_mode');
+      const isDark = savedDark === '1';
       setDarkMode(isDark);
-      if (isDark) document.documentElement.classList.add('dark-mode');
+      if (isDark) {
+        document.documentElement.classList.add('dark-mode');
+        document.body.classList.add('dark-mode');
+      }
+
+      const savedContrast = localStorage.getItem('fp_high_contrast');
+      const isContrast = savedContrast === '1';
+      setHighContrast(isContrast);
+      if (isContrast) {
+        document.documentElement.classList.add('high-contrast');
+        document.body.classList.add('high-contrast');
+      }
     } catch (e) {
       // noop
     }
@@ -50,6 +62,24 @@ import './FloatingAccessibilityButton.css';
     }
   };
 
+  const toggleContrast = () => {
+    const next = !highContrast;
+    setHighContrast(next);
+    try {
+      if (next) {
+        document.documentElement.classList.add('high-contrast');
+        document.body.classList.add('high-contrast');
+        localStorage.setItem('fp_high_contrast', '1');
+      } else {
+        document.documentElement.classList.remove('high-contrast');
+        document.body.classList.remove('high-contrast');
+        localStorage.setItem('fp_high_contrast', '0');
+      }
+    } catch (e) {
+      // noop
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -60,7 +90,7 @@ import './FloatingAccessibilityButton.css';
           <input type="checkbox" checked={darkMode} onChange={toggleDarkMode} /> Modo nocturno
         </label>
         <label>
-          <input type="checkbox" /> Contraste alto
+          <input type="checkbox" checked={highContrast} onChange={toggleContrast} /> Contraste alto
         </label>
         <div className="slider-group">
           <span>Tamaño de letra</span>
