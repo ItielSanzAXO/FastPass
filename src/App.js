@@ -17,6 +17,7 @@ import ValidateTicketPage from './pages/ValidateTicketPage.js';
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
 import logo from './assets/FastPassBG.png'; // Importar el logo
+import FloatingAccessibilityButton from './components/FloatingAccessibilityButton.js';
 import './App.css'; // Importar los estilos de la aplicación
 
 function Navigation() {
@@ -89,6 +90,7 @@ function App() {
             </Switch>
           </div>
           <Footer />
+          <FloatingAccessibilityButton />
         </div>
       </Router>
     </AuthProvider>
