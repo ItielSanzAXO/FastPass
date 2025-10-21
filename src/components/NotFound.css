@@ -8,7 +8,7 @@
 }
 
 .notfound-card {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
   padding: 32px;
@@ -20,18 +20,16 @@
 .notfound-title {
   font-size: 72px;
   margin: 0 0 8px;
-  color: #111827;
+  color: var(--text);
 }
-
 .notfound-subtitle {
   font-size: 20px;
   margin: 0 0 12px;
-  color: #374151;
+  color: var(--muted);
 }
-
 .notfound-text {
   font-size: 16px;
-  color: #4b5563;
+  color: var(--muted);
   margin-bottom: 24px;
 }
 
@@ -43,21 +41,21 @@
 }
 
 .notfound-button {
-  background-color: #111827;
-  color: #fff;
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
   padding: 10px 16px;
   border-radius: 8px;
   text-decoration: none;
 }
 
 .notfound-link {
-  color: #111827;
+  color: var(--text);
   text-decoration: none;
   padding: 10px 16px;
 }
 
 .notfound-button:hover {
-  background-color: #1f2937;
+  background-color: color-mix(in srgb, var(--footer-bg) 70%, black 30%);
 }
 
 .notfound-link:hover {

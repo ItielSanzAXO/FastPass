@@ -1,15 +1,16 @@
 :root {
-  --c-primary: #1e9ade;
-  --c-primary-dk: #0b3c5d;
-  --c-primary-50: #eefbff;
-  --c-accent: #6995bb;
-  --c-bg: #f7fbff;
-  --c-card: #eaf6ff;
-  --c-shadow: #b6d6f7a0;
-  --c-shadow-hover: #b6d6f7cc;
-  --c-text: #1e9ade;
-  --c-text-subtle: #3a5a7a;
-  --c-price: #0b3c5d;
+  /* Keep module-level vars but map to app-level variables for theming */
+  --c-primary: var(--primary, #1e9ade);
+  --c-primary-dk: color-mix(in srgb, var(--primary, #1e9ade) 70%, black 30%);
+  --c-primary-50: color-mix(in srgb, var(--primary, #1e9ade) 10%, var(--bg, #ffffff) 90%);
+  --c-accent: var(--muted, #6995bb);
+  --c-bg: var(--bg, #f7fbff);
+  --c-card: var(--surface, #eaf6ff);
+  --c-shadow: color-mix(in srgb, var(--surface, #eaf6ff) 70%, black 30%);
+  --c-shadow-hover: color-mix(in srgb, var(--surface, #eaf6ff) 60%, black 40%);
+  --c-text: var(--primary, #1e9ade);
+  --c-text-subtle: var(--muted, #3a5a7a);
+  --c-price: var(--price, var(--primary, #0b3c5d));
 }
 
 /* Contenedor */
@@ -52,11 +53,21 @@
   gap: 16px;
   padding: 18px 24px;
   margin: 18px 0;
-  border: 1.5px solid var(--c-accent);
   border-radius: 10px;
-  background: var(--c-card);
+  /* make card background darker so white text is readable in light theme */
+  background-color: color-mix(in srgb, var(--c-card) 82%, black 18%);
+  border: 1.5px solid color-mix(in srgb, var(--c-accent) 56%, black 24%);
   box-shadow: 0 2px 8px 0 var(--c-shadow);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.resale-ticket-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.04));
+  border-radius: 10px; /* match card radius */
 }
 .resale-ticket-card:hover {
   box-shadow: 0 4px 16px 0 var(--c-shadow-hover);
@@ -79,7 +90,7 @@
 .resale-event-name {
   font-size: 1.25rem;
   font-weight: bold;
-  color: var(--c-primary);
+  color: var(--card-text, var(--c-primary));
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -92,7 +103,7 @@
   flex-wrap: wrap;      /* permite salto en líneas pequeñas */
   gap: 12px 18px;
   font-size: 1rem;
-  color: var(--c-text-subtle);
+  color: color-mix(in srgb, var(--card-text, var(--c-text-subtle)) 75%, var(--c-text-subtle) 25%);
 }
 .resale-zone { font-weight: 500; }
 .resale-date { font-style: italic; }
@@ -100,7 +111,7 @@
 /* Precio */
 .resale-price {
   font-size: 1.1rem;
-  color: var(--c-price);
+  color: var(--card-text, var(--c-price));
   margin-top: 2px;
 }
 
@@ -121,11 +132,11 @@
 }
 .resale-buy-btn:hover {
   background-color: var(--c-primary-dk);
-  color: #fff;
+  color: var(--primary-contrast, #fff);
 }
 .resale-buy-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(30,154,222,0.35);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary, #1e9ade) 35%, transparent 65%);
 }
 
 /* Estado opcional deshabilitado */
@@ -151,4 +162,9 @@
     width: 100%;
     margin-left: 0;
   }
+}
+
+/* Force white text inside resale ticket cards */
+.resale-ticket-card, .resale-ticket-card * {
+  color: var(--card-text, #fff) !important;
 }

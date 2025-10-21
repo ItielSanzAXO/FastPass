@@ -1,0 +1,67 @@
+.accessibility-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.accessibility-modal {
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 32px 24px 24px 24px;
+  min-width: 320px;
+  max-width: 90vw;
+  color: var(--text);
+  font-family: inherit;
+  position: relative;
+}
+.accessibility-modal h2 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.accessibility-options {
+  margin-bottom: 16px;
+}
+.accessibility-options label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+.slider-group {
+  margin-bottom: 10px;
+}
+.select-group {
+  margin-bottom: 10px;
+}
+.guide-btn {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.close-btn {
+  background: var(--surface);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+}
+.close-btn:hover {
+  background: var(--primary);
+  color: var(--primary-contrast);
+}

@@ -13,7 +13,7 @@
 }
 
 .ticket-modal-content {
-  background: #fff;
+  background: var(--surface);
   border-radius: 12px;
   padding: 32px 24px 24px 24px;
   min-width: 320px;
@@ -27,8 +27,8 @@
   position: absolute;
   top: 12px;
   right: 16px;
-  background: #d9534f;
-  color: #fff;
+  background: var(--danger);
+  color: var(--primary-contrast);
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -47,6 +47,6 @@
 .ticket-modal-qr-link {
   margin-top: 10px;
   font-size: 0.9em;
-  color: #1e9ade;
+  color: var(--primary);
   word-break: break-all;
 }

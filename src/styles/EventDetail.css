@@ -5,7 +5,7 @@
   justify-content: center;
   min-height: 40vh;
   gap: 12px;
-  color: #374151;
+  color: var(--muted);
 }
 
 .event-loading p {

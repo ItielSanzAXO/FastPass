@@ -1,12 +1,12 @@
 .navigation-container {
   font-family: 'Disket Mono', monospace;
-  background-color: rgba(255, 255, 255, 0.486); /* Blanco transparente */
+  background-color: var(--header-bg); /* Blanco transparente */
   position: relative; /* Quitar posición fija */
   top: 0;
   width: 100%;
   z-index: 1000; /* Asegurar que esté por encima de otros elementos */
   box-shadow: none; /* Eliminar sombra */
-  color: #006bff; /* Cambiar color secundario */
+  color: var(--primary); /* Cambiar color secundario */
   display: flex; 
   justify-content: space-between;
   align-items: center;
@@ -16,20 +16,20 @@
 
 .navigation-logo {
   font-family: 'Disket Mono', monospace;
-  color: #61dafb; /* Cambiar color terciario */
+  color: var(--primary);
   font-size: 1.5rem;
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .navigation-title {
-  color: #006bbf; /* Cambiar color secundario */
+  color: var(--primary);
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .navigation-title:hover {
-  color: #fff;
+  color: var(--primary-contrast);
 }
 
 .navigation-links {
@@ -50,20 +50,20 @@
 .navigation-link {
   font-family: 'Disket Mono', monospace;
   text-decoration: none;
-  color: #61dafb;
+  color: var(--primary);
   font-size: 1.2rem;
   transition: color 0.3s;
 }
 
 .navigation-link:hover {
-  color: #21a1f1;
+  color: color-mix(in srgb, var(--primary) 80%, var(--muted) 20%);
 }
 
 .hamburger-button {
   font-family: 'Disket Mono', monospace;
   background: none;
   border: none;
-  color: white;
+  color: var(--primary-contrast);
   font-size: 1.5rem;
   cursor: pointer;
   display: none;
@@ -87,7 +87,7 @@
     flex-direction: column; /* Mostrar los enlaces en una columna */
     gap: 10px; /* Reducir el espacio entre los enlaces */
     width: 250px; /* Ajustar el ancho del menú desplegable */
-    background-color: #393ce5; /* Cambiar color principal */
+    background-color: var(--primary); /* Cambiar color principal */
     padding: 20px; /* Ajustar el padding */
     position: fixed; /* Fijar el menú en la pantalla */
     top: 0; /* Ajustar al inicio de la pantalla */
@@ -101,9 +101,9 @@
     display: flex; /* Mostrar el menú cuando esté abierto */
   }
 
-  .navigation-link {
+    .navigation-link {
     font-size: 1rem; /* Reducir el tamaño del texto */
-    color: #fff; /* Cambiar color secundario */
+    color: var(--primary-contrast); /* Cambiar color secundario */
     text-align: left;
   }
 }
