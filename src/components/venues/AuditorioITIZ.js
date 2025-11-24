@@ -228,6 +228,20 @@ function AuditorioITIZ({ event }) {
     })
     .join(', ');
 
+  // Array de etiquetas (PaymentPopup espera un array de strings)
+  const selectedSeatsArray = selectedSeats.map(id => {
+    const ticket = tickets.find(t => t.id === id);
+    return ticket ? ticket.seat : id;
+  });
+
+  // Calcular precio total sumando por boleto según su tipo/zone
+  const totalPrice = selectedSeats.reduce((sum, id) => {
+    const ticket = tickets.find(t => t.id === id);
+    if (!ticket) return sum;
+    const perTicket = ticket.type === 'VIP' ? (event.ticketPricing?.VIP || 0) : (event.ticketPricing?.General || 0);
+    return sum + perTicket;
+  }, 0);
+
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Mapa del Auditorio */}
@@ -288,23 +302,20 @@ function AuditorioITIZ({ event }) {
       {/* Payment Popup */}
       {showPopup && (
         <PaymentPopup
-          selectedSeats={selectedSeats}
+          selectedSeats={selectedSeatsArray}
           onClose={() => setShowPopup(false)}
           onConfirm={confirmPurchase}
-          isFree={
-            // Si ambos precios son 0 o Gratis, o si el usuario solo selecciona asientos de zona gratis
-            (() => {
-              if (!event.ticketPricing) return false;
-              // Si todos los precios son 0
-              const allZero = Object.values(event.ticketPricing).every(p => p === 0 || p === 'Gratis');
-              if (allZero) return true;
-              // Si todos los asientos seleccionados son de zona gratis
-              const selectedTickets = tickets.filter(t => selectedSeats.includes(t.id));
-              return selectedTickets.length > 0 && selectedTickets.every(t => event.ticketPricing[t.type] === 0 || event.ticketPricing[t.type] === 'Gratis');
-            })()
-          }
+          isFree={totalPrice === 0}
+          price={totalPrice}
+          eventName={event.name}
+          zone={selectedSeats.length === 0 ? null : (tickets.find(t => t.id === selectedSeats[0])?.zone || null)}
+          ticketCount={selectedSeats.length}
+          eventId={event.id}
+          userUid={user?.uid}
+          seats={selectedSeats}
         />
       )}
+
       {/* Modal para verificar código enviado por correo */}
       <VerifyCodeModal
         isOpen={showVerifyModal}
