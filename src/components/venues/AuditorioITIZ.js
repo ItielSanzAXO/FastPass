@@ -5,6 +5,9 @@ import { format } from 'date-fns';
 import '../../styles/AuditorioITIZ.css';
 import { useAuth } from '../../context/AuthContext.js';
 import PaymentPopup from './PaymentPopup.js';
+import VerifyCodeModal from '../VerifyCodeModal.js';
+
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://fastpass-backend.vercel.app';
 
 function formatFirebaseTimestamp(timestamp) {
   if (!timestamp || !timestamp.seconds) return null;
@@ -17,6 +20,10 @@ function AuditorioITIZ({ event }) {
   const [tickets, setTickets] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verificationId, setVerificationId] = useState(null);
+  const [isStartingVerification, setIsStartingVerification] = useState(false);
+  const [startVerificationError, setStartVerificationError] = useState(null);
   const ticketLimit = event.ticketLimitPerUser || 3; // Límite de boletos por usuario
 
   useEffect(() => {
@@ -57,8 +64,44 @@ function AuditorioITIZ({ event }) {
   };
 
   const handlePurchase = () => {
-    setShowPopup(true);
+    // Iniciar verificación por correo antes de mostrar la pasarela
+    startVerification();
   };
+
+  const startVerification = async () => {
+  if (!user?.email || !user?.uid) {
+    alert('Debes iniciar sesión con un correo válido para comprar.');
+    return;
+  }
+
+  setIsStartingVerification(true);
+  setStartVerificationError(null);
+  try {
+    const res = await fetch(`${API_BASE}/api/start-payment-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email, uid: user.uid }),
+    });
+
+    const data = await res.json();      // 👈 lee siempre el JSON
+    console.log("start-payment-verification:", data);
+
+    if (!data.ok) {
+      throw new Error(data.error || 'No se pudo enviar el código');
+    }
+
+    const vid = data.verificationId;
+    setVerificationId(vid);
+    setShowVerifyModal(true);
+  } catch (err) {
+    console.error('start-verification error', err);
+    setStartVerificationError(err.message || 'No se pudo iniciar la verificación');
+    alert('No se pudo enviar el código. Intenta nuevamente.');
+  } finally {
+    setIsStartingVerification(false);
+  }
+};
+
 
   const confirmPurchase = async () => {
     if (!selectedSeats.length) {
@@ -226,15 +269,19 @@ function AuditorioITIZ({ event }) {
           </div>
           <button
             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:bg-gray-400"
-            disabled={selectedSeats.length === 0 || !user}
+            disabled={selectedSeats.length === 0 || !user || isStartingVerification}
             onClick={handlePurchase}
           >
-            {user
-              ? selectedSeats.length > 0
-                ? `Comprar boletos para ${selectedSeats.length} asientos`
-                : 'Selecciona asientos'
-              : 'Inicia sesión para comprar boletos'}
+            {isStartingVerification ? 'Enviando código...' : (
+              user
+                ? selectedSeats.length > 0
+                  ? `Comprar boletos para ${selectedSeats.length} asientos`
+                  : 'Selecciona asientos'
+                : 'Inicia sesión para comprar boletos')}
           </button>
+          {startVerificationError && (
+            <p style={{ color: '#ff6b6b', marginTop: 8, fontSize: 14 }}>{startVerificationError}</p>
+          )}
         </div>
       </div>
 
@@ -258,6 +305,17 @@ function AuditorioITIZ({ event }) {
           }
         />
       )}
+      {/* Modal para verificar código enviado por correo */}
+      <VerifyCodeModal
+        isOpen={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        verificationId={verificationId}
+        uid={user?.uid}
+        onVerified={() => {
+          setShowVerifyModal(false);
+          setShowPopup(true);
+        }}
+      />
     </div>
   );
 }
