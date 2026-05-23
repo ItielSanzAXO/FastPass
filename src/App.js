@@ -14,6 +14,7 @@ import Footer from './components/Footer.js'; // Importar el Footer
 import NotFound from './components/NotFound.js';
 import ProtectedRoute from './components/ProtectedRoute.js';
 import ValidateTicketPage from './pages/ValidateTicketPage.js';
+import PaymentSuccessPage from './pages/PaymentSuccessPage.js';
 import './styles/Navigation.css'; // Importar los estilos del menú
 import { useState } from 'react'; // Importar useState para manejar el estado del menú
 import logo from './assets/FastPassDM.png'; // Importar el logo para modo oscuro
@@ -85,6 +86,7 @@ function App() {
               <Route path="/Contact" component={Contact} />
               <ProtectedRoute path="/add-event" component={AddEvent} />
               <Route path="/validate/:eventId/:ticketId" component={ValidateTicketPage} />
+              <Route path="/payment-success" component={PaymentSuccessPage} />
               {/* Ruta comodín para 404 - debe ir al final */}
               <Route component={NotFound} />
             </Switch>

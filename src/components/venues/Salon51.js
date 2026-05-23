@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PaymentPopup from './PaymentPopup.js';
+import VerifyCodeModal from '../VerifyCodeModal.js';
 import styles from '../../styles/Salon51.module.css';
 import { format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext.js';
@@ -13,11 +14,17 @@ function formatFirebaseTimestamp(timestamp) {
 }
 
 const Salon51 = ({ event }) => {
+  const API_BASE = process.env.REACT_APP_API_BASE || 'https://fastpass-backend.vercel.app';
+  const START_VERIFICATION_URL = `${API_BASE}/api/start-payment-verification`;
   const { user } = useAuth();
   const [ticketCount, setTicketCount] = useState(0);
   const [selectedZone, setSelectedZone] = useState(null);
   const ticketLimit = event.ticketLimitPerUser || 3;
   const [showPayment, setShowPayment] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verificationId, setVerificationId] = useState(null);
+  const [isStartingVerification, setIsStartingVerification] = useState(false);
+  const [startVerificationError, setStartVerificationError] = useState(null);
   // const [loading, setLoading] = useState(false);
 
   const increment = () => {
@@ -29,6 +36,35 @@ const Salon51 = ({ event }) => {
   const decrement = () => {
     if (ticketCount > 0) {
       setTicketCount(ticketCount - 1);
+    }
+  };
+
+  const startVerification = async () => {
+    if (!user?.email || !user?.uid) {
+      setStartVerificationError('Debes iniciar sesión con un correo válido para comprar.');
+      return;
+    }
+    setIsStartingVerification(true);
+    setStartVerificationError(null);
+    try {
+      const res = await fetch(START_VERIFICATION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, uid: user.uid }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Error iniciando verificación (status ${res.status})`);
+      }
+      const data = await res.json();
+      const vid = data.verificationId || data.id || data.verification_id || null;
+      setVerificationId(vid);
+      setShowVerifyModal(true);
+    } catch (err) {
+      console.error('start-verification error', err);
+      setStartVerificationError(err.message || 'No se pudo iniciar la verificación');
+    } finally {
+      setIsStartingVerification(false);
     }
   };
 
@@ -150,18 +186,34 @@ const Salon51 = ({ event }) => {
             <p className={styles.limit}>Máximo permitido: {ticketLimit} boletos</p>
             <button
               className={styles.buyButton}
-              disabled={ticketCount === 0 || !selectedZone || !user}
-              onClick={() => setShowPayment(true)}
+              disabled={ticketCount === 0 || !selectedZone || !user || isStartingVerification}
+              onClick={() => startVerification()}
             >
-              {user
-                ? selectedZone
-                  ? `Comprar boletos ${selectedZone}`
-                  : 'Selecciona una zona'
-                : 'Inicia sesión para comprar boletos'}
+              {isStartingVerification ? 'Enviando código...' : (
+                user
+                  ? selectedZone
+                    ? `Comprar boletos ${selectedZone}`
+                    : 'Selecciona una zona'
+                  : 'Inicia sesión para comprar boletos')}
             </button>
+            {startVerificationError && (
+              <p style={{ color: '#ff6b6b', marginTop: 8, fontSize: 14 }}>{startVerificationError}</p>
+            )}
           </div>
         </div>
       </div>
+      {showVerifyModal && (
+        <VerifyCodeModal
+          isOpen={showVerifyModal}
+          onClose={() => setShowVerifyModal(false)}
+          verificationId={verificationId}
+          uid={user?.uid}
+          onVerified={() => {
+            setShowVerifyModal(false);
+            setShowPayment(true);
+          }}
+        />
+      )}
     </div>
   );
 };

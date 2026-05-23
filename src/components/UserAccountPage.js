@@ -5,6 +5,9 @@ import { db } from '../firebaseConfig.js';
 import { collection, getDocs, query, where, doc, getDoc, updateDoc } from 'firebase/firestore';
 import '../styles/UserAccountPage.css';
 import TicketModal from './TicketModal.js';
+import GeeTest from 'react-geetest-v4'; 
+import NotificationPopup from './NotificationPopup.js';
+
 
 function UserAccountPage() {
   const [userTickets, setUserTickets] = useState([]);
@@ -12,7 +15,10 @@ function UserAccountPage() {
   const [userInfo, setUserInfo] = useState({ name: '', profilePic: '' });
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [notification, setNotification] = useState({ isOpen: false, title: '', message: '' });
+  
   const history = useHistory();
+
 
   useEffect(() => {
     const auth = getAuth();
@@ -138,42 +144,74 @@ function UserAccountPage() {
         setResaleTickets([...resaleTickets, ticketToSell]);
         setUserTickets(userTickets.filter(ticket => ticket.id !== ticketId));
 
-        alert(`El boleto para ${ticketToSell.eventName} se ha puesto en reventa.`);
+        setNotification({ isOpen: true, title: '¡Listo!', message: `El boleto para ${ticketToSell.eventName} se ha puesto en reventa.` });
       } catch (error) {
         console.error('Error al actualizar el boleto en Firestore:', error);
-        alert('Hubo un error al intentar poner el boleto en reventa.');
+        setNotification({ isOpen: true, title: 'Error', message: 'Hubo un error al intentar poner el boleto en reventa.' });
       }
     }
   };
 
-  const handleToggleResale = async (ticketId) => {
-    const ticketToToggle = userTickets.find(ticket => ticket.id === ticketId);
-    if (ticketToToggle) {
-      try {
-        const ticketDocRef = doc(db, 'tickets', ticketId);
-        const newForResaleStatus = !ticketToToggle.forResale;
+  const handleToggleResale = async (ticket) => {
+    try {
+      const ticketDocRef = doc(db, "tickets", ticket.id);
+      const newForResaleStatus = !ticket.forResale;
 
-        await updateDoc(ticketDocRef, {
-          forResale: newForResaleStatus,
-        });
+      await updateDoc(ticketDocRef, {
+        forResale: newForResaleStatus,
+      });
 
-        const updatedTickets = userTickets.map(ticket =>
-          ticket.id === ticketId ? { ...ticket, forResale: newForResaleStatus } : ticket
-        );
+      const updatedTickets = userTickets.map((t) =>
+        t.id === ticket.id ? { ...t, forResale: newForResaleStatus } : t
+      );
 
-        setUserTickets(updatedTickets);
+      setUserTickets(updatedTickets);
 
-        alert(
-          newForResaleStatus
-            ? `El boleto para ${ticketToToggle.eventName} se ha puesto en reventa.`
-            : `El boleto para ${ticketToToggle.eventName} se ha quitado de reventa.`
-        );
-      } catch (error) {
-        console.error('Error al actualizar el estado de reventa en Firestore:', error);
-        alert('Hubo un error al intentar cambiar el estado de reventa del boleto.');
-      }
+      setNotification({
+        isOpen: true,
+        title: newForResaleStatus ? '¡Listo!' : 'Actualizado',
+        message: newForResaleStatus
+          ? `El boleto para ${ticket.eventName} se ha puesto en reventa.`
+          : `El boleto para ${ticket.eventName} se ha quitado de reventa.`
+      });
+    } catch (error) {
+      console.error(
+        "Error al actualizar el estado de reventa en Firestore:",
+        error
+      );
+      setNotification({ isOpen: true, title: 'Error', message: 'Hubo un error al intentar cambiar el estado de reventa del boleto.' });
     }
   };
+
+  // URL del backend que verifica la respuesta de GeeTest
+  const VERIFY_URL = "https://fastpass-backend.vercel.app/api/verify-geetest";
+
+  // Handler: recibe resultado del captcha y, si es válido, llama a handleToggleResale
+  const handleCaptchaForTicket = async (result, ticket) => {
+    try {
+      console.log("Resultado bruto de GeeTest:", result);
+
+      const resp = await fetch(VERIFY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result), // GeeTest ya trae captcha_output, etc.
+      });
+
+      const data = await resp.json();
+      console.log("Respuesta backend GeeTest:", data);
+
+      if (data.ok) {
+        // Puzzle validado: ejecutar la lógica de reventa
+        await handleToggleResale(ticket);
+      } else {
+        setNotification({ isOpen: true, title: 'Error de verificación', message: 'No se pudo verificar el puzzle en el servidor. Intenta de nuevo.' });
+      }
+    } catch (e) {
+      console.error("Error llamando al backend GeeTest:", e);
+      setNotification({ isOpen: true, title: 'Error', message: 'Error al verificar el puzzle en el servidor.' });
+    }
+  };
+
 
   const handleLogout = async () => {
     const auth = getAuth();
@@ -225,12 +263,18 @@ function UserAccountPage() {
               <p className="user-account-ticket-info">Precio: ${ticket.price}</p>
               <p className="user-account-ticket-info">Zona: {ticket.zone}</p>
               <p className="user-account-ticket-info">Asiento: {ticket.seat}</p>
-              <button
-                onClick={() => handleToggleResale(ticket.id)}
-                className={`user-account-resale-btn${ticket.forResale ? ' resale' : ''}`}
+              <GeeTest
+                captchaId="5a589307d9f26d84b6308457c7dbc837"
+                product="bind"
+                onSuccess={(result) => handleCaptchaForTicket(result, ticket)}
               >
-                {ticket.forResale ? 'Quitar de Reventa' : 'Poner en Reventa'}
-              </button>
+                <button
+                  type="button"
+                  className={`user-account-resale-btn${ticket.forResale ? ' resale' : ''}`}
+                >
+                  {ticket.forResale ? 'Quitar de Reventa' : 'Poner en Reventa'}
+                </button>
+              </GeeTest>
               <button
                 onClick={() => { setSelectedTicket(ticket); setIsModalOpen(true); }}
                 className="user-account-resale-btn"
@@ -247,6 +291,12 @@ function UserAccountPage() {
         onClose={() => setIsModalOpen(false)}
         ticket={selectedTicket}
         userName={userInfo.name}
+      />
+      <NotificationPopup
+        isOpen={notification.isOpen}
+        title={notification.title}
+        message={notification.message}
+        onClose={() => setNotification({ isOpen: false, title: '', message: '' })}
       />
     </div>
   );
