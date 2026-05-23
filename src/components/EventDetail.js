@@ -18,6 +18,7 @@ const venueComponents = {
 function EventDetail() {
   const { eventId } = useParams();
   const [event, setEvent] = useState(null);
+  const [layoutType, setLayoutType] = useState(null);
   const [loading, setLoading] = useState(true);
   const MIN_LOADING_MS = 5000; // mantener el loader al menos 5s
 
@@ -36,6 +37,17 @@ function EventDetail() {
         if (eventSnap.exists()) {
           const eventData = eventSnap.data();
           if (isMounted) setEvent({ id: eventId, ...eventData }); // Asegurarse de incluir el ID del evento
+
+          try {
+            const venueSnap = await getDoc(doc(db, 'venues', eventData.venueId));
+            if (venueSnap.exists() && isMounted) {
+              setLayoutType(venueSnap.data().layoutType || eventData.venueId);
+            } else if (isMounted) {
+              setLayoutType(eventData.venueId);
+            }
+          } catch {
+            if (isMounted) setLayoutType(eventData.venueId);
+          }
         } else {
           console.error('Evento no encontrado');
         }
@@ -78,7 +90,7 @@ function EventDetail() {
     return <NotFound />;
   }
 
-  const VenueComponent = venueComponents[event.venueId] || AuditorioITIZ; // Default to AuditorioITIZ
+  const VenueComponent = venueComponents[layoutType || event.venueId] || AuditorioITIZ; // Default to AuditorioITIZ
 
   if (!VenueComponent) {
     return <p>Venue no soportado.</p>;

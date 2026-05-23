@@ -31,6 +31,7 @@ function PaymentPopup({
 }) {
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const checkoutSeats = Array.isArray(seats) ? seats : selectedSeats;
 
   const handleConfirm = async () => {
     // Boletos gratis: mismo flujo que antes
@@ -63,7 +64,7 @@ function PaymentPopup({
           zone,
           ticketCount,
           userUid,
-          seats: selectedSeats,
+          seats: checkoutSeats,
         })
       );
 
@@ -75,7 +76,7 @@ function PaymentPopup({
           eventName,
           zone,
           ticketCount,
-          seats: selectedSeats,
+          seats: checkoutSeats,
           successUrl,
           cancelUrl,
         }),

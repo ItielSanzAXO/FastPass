@@ -52,23 +52,41 @@ body, html {
   overflow: hidden; /* Evitar desbordamiento */
 }
 
+.homepage-carousel .slick-list,
+.homepage-carousel .slick-track,
+.homepage-carousel .slick-slide,
+.homepage-carousel .slick-slide > div {
+  height: 100%;
+}
+
 .carousel-slide {
   position: relative;
   width: 100%;
+  height: clamp(280px, 48vw, 520px);
 }
 
-.carousel-slide img {
-  width: 100%; /* Ajustar al ancho del contenedor */
-  height: 100%; /* Ajustar al alto del contenedor */
-  object-fit: cover; /* Evitar que se deforme o se corte */
-  display: block;
-  max-height: auto; /* Ajuste de altura máxima */
+.carousel-media {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #0f172a;
+}
+
+.carousel-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.35));
+  pointer-events: none;
 }
 
 .banner-content {
   position: absolute;
   bottom: 30px;
   left: 30px;
+  z-index: 2;
   color: var(--primary-contrast);
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.6), color-mix(in srgb, var(--surface) 60%, transparent 40%));
   padding: 25px 35px;
@@ -167,9 +185,15 @@ body, html {
 .homepage-featured h2 {
   font-size: 2rem;
   margin-bottom: 25px; /* Reducir el margen inferior */
-  color: var(--primary-contrast);
+  color: #111;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+/* Mantener contraste del título en modo oscuro */
+html.dark-mode .homepage-featured h2,
+body.dark-mode .homepage-featured h2 {
+  color: var(--primary-contrast);
 }
 
 .featured-grid {
@@ -264,6 +288,10 @@ body, html {
 
 /* Ajustes para pantallas pequeñas */
 @media (max-width: 768px) {
+  .carousel-slide {
+    height: clamp(240px, 62vw, 360px);
+  }
+
   .banner-content {
     bottom: 10%;
     left: 5%;

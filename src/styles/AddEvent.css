@@ -289,6 +289,21 @@
   margin-top: 6px;
   text-align: center;
 }
+
+.add-event-venues-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.add-event-venue-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--surface) 80%, black 20%);
+  border-radius: 8px;
+  background: var(--bg);
+}
 .add-event-success {
   color: var(--success);
   background: color-mix(in srgb, var(--success) 10%, var(--surface) 90%);

@@ -34,6 +34,134 @@
   cursor: pointer;
 }
 
+.wallet-summary-section {
+  margin: 18px 0 28px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--surface) 70%, var(--muted) 30%);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 90%, black 10%);
+}
+
+.wallet-toggle-btn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 84%, black 16%);
+  color: var(--text, #1f2937);
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wallet-toggle-meta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.wallet-toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.wallet-toggle-icon.open {
+  transform: rotate(180deg);
+}
+
+.wallet-panel {
+  margin-top: 12px;
+}
+
+.wallet-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.wallet-card {
+  border: 1px solid color-mix(in srgb, var(--surface) 70%, var(--muted) 30%);
+  border-radius: 8px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--surface) 85%, black 15%);
+}
+
+.wallet-label {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.wallet-value {
+  margin: 6px 0 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.wallet-withdraw-btn {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-weight: 700;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  cursor: pointer;
+}
+
+.wallet-withdraw-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wallet-movements {
+  margin-top: 14px;
+}
+
+.wallet-movements h3 {
+  margin: 0 0 8px;
+}
+
+.wallet-empty {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.wallet-movement-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.wallet-movement-item {
+  display: grid;
+  grid-template-columns: 1.3fr 1.2fr 0.8fr 0.6fr;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--surface) 70%, var(--muted) 30%);
+  background: color-mix(in srgb, var(--surface) 90%, black 10%);
+}
+
+.movement-positive {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.movement-negative {
+  color: #ef4444;
+  font-weight: 700;
+}
+
 .user-account-tickets-list {
   list-style-type: none;
   padding: 0;
@@ -123,4 +251,20 @@
 /* Force white text inside ticket items */
 .user-account-ticket-item, .user-account-ticket-item * {
   color: var(--card-text, #fff) !important;
+}
+
+@media (max-width: 720px) {
+  .wallet-toggle-btn {
+    grid-template-columns: 1fr auto;
+  }
+
+  .wallet-toggle-meta {
+    grid-column: 1 / span 2;
+    justify-self: start;
+  }
+
+  .wallet-movement-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
 }

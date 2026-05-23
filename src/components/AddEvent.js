@@ -11,6 +11,7 @@ import {
   getDocs,
   Timestamp,
   deleteDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { generateTicketsForEvent } from "../utils/generateTicketsForEvent.js";
 import { deleteTicketsForEvent } from "../utils/deleteTicketsForEvent.js";
@@ -27,13 +28,22 @@ import "../styles/AddEvent.css";
 // --- Helpers / Estado inicial ---
 const initialState = {
   name: "",
-  venueId: "auditorio-itiz",
+  venueId: "",
   allowResale: false,
   ticketLimitPerUser: 1,
   ticketPricing: { General: 0, VIP: 0 },
   imageUrl: "",
   isUpcomingLaunch: false, // ⬅️ flag para lanzamientos
   date: "", // 'YYYY-MM-DDTHH:mm'
+};
+
+const initialVenueState = {
+  id: "",
+  name: "",
+  type: "",
+  capacity: "",
+  zones: "General",
+  layoutType: "salon-51",
 };
 
 function pad2(n) {
@@ -71,6 +81,16 @@ function toTimestamp(input) {
   return Timestamp.fromDate(d);
 }
 
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 // --- COMPONENTE ---
 function AddEvent() {
   // Popup para éxito y mensajes
@@ -106,6 +126,7 @@ function AddEvent() {
   // Acciones / datos
   const [action, setAction] = useState("");
   const [events, setEvents] = useState([]);
+  const [venues, setVenues] = useState([]);
 
   // Editar
   const [editId, setEditId] = useState(null);
@@ -118,6 +139,9 @@ function AddEvent() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [venueForm, setVenueForm] = useState(initialVenueState);
+  const [venueError, setVenueError] = useState("");
+  const [venueLoading, setVenueLoading] = useState(false);
 
   const history = useHistory();
 
@@ -191,12 +215,77 @@ function AddEvent() {
       const list = [];
       snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
       setEvents(list);
+
+      const venuesSnap = await getDocs(collection(db, "venues"));
+      const venueList = [];
+      venuesSnap.forEach((d) => venueList.push({ id: d.id, ...d.data() }));
+      venueList.sort((a, b) => String(a.name || a.id).localeCompare(String(b.name || b.id)));
+      setVenues(venueList);
+
+      if (venueList.length > 0) {
+        setForm((prev) => ({
+          ...prev,
+          venueId: prev.venueId || venueList[0].id,
+        }));
+      }
     })();
   }, [isLoggedIn, action]);
+
+  const selectedVenue = venues.find((venue) => venue.id === form.venueId) || null;
+  const selectedEditVenue = venues.find((venue) => venue.id === editForm.venueId) || null;
 
   // Permitir refrescar la lista manualmente desde el botón "Editar evento"
   const handleShowEditList = () => {
     setAction("edit");
+  };
+
+  const handleVenueChange = (e) => {
+    const { name, value } = e.target;
+    setVenueForm((prev) => ({
+      ...prev,
+      [name]: name === "id" ? slugify(value) : value,
+    }));
+  };
+
+  const handleVenueSubmit = async (e) => {
+    e.preventDefault();
+    setVenueError("");
+    setVenueLoading(true);
+
+    try {
+      const venueId = slugify(venueForm.id || venueForm.name);
+      if (!venueId) throw new Error("El ID o nombre del venue es obligatorio.");
+      if (!venueForm.name.trim()) throw new Error("El nombre del venue es obligatorio.");
+
+      const payload = {
+        name: venueForm.name.trim(),
+        type: venueForm.type.trim() || "Venue",
+        capacity: Number(venueForm.capacity || 0),
+        zones: venueForm.zones
+          .split(",")
+          .map((zone) => zone.trim())
+          .filter(Boolean),
+        layoutType: venueForm.layoutType,
+        createdAt: serverTimestamp(),
+      };
+
+      await setDoc(doc(db, "venues", venueId), payload, { merge: true });
+
+      const newVenue = { id: venueId, ...payload };
+      setVenues((prev) => [...prev.filter((venue) => venue.id !== venueId), newVenue].sort((a, b) => String(a.name || a.id).localeCompare(String(b.name || b.id))));
+      setForm((prev) => ({ ...prev, venueId: prev.venueId || venueId }));
+      setVenueForm(initialVenueState);
+      setPopupMsg("Venue guardado correctamente ✅");
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+        setPopupMsg("");
+      }, 1500);
+    } catch (err) {
+      setVenueError(err.message || "No se pudo guardar el venue.");
+    } finally {
+      setVenueLoading(false);
+    }
   };
 
   // --- Seleccionar evento a editar ---
@@ -381,7 +470,7 @@ function AddEvent() {
           ticketPricing: {
             General: Number(form.ticketPricing?.General || 0),
             VIP:
-              form.venueId === "salon-51"
+              selectedVenue?.layoutType === "salon-51"
                 ? 0
                 : Number(form.ticketPricing?.VIP || 0),
           },
@@ -459,6 +548,12 @@ function AddEvent() {
                   >
                     Editar evento
                   </button>
+                  <button
+                    className="add-event-btn add-event-btn-gray"
+                    onClick={() => setAction("venues")}
+                  >
+                    Administrar venues
+                  </button>
                 </div>
               </div>
             ) : null}
@@ -473,10 +568,109 @@ function AddEvent() {
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
                   loading={loading}
+                  venues={venues}
+                  selectedVenue={selectedVenue}
                   // success eliminado del render normal
                   error={error}
                   onCancel={() => setAction("")}
                 />
+              </div>
+            )}
+
+            {action === "venues" && (
+              <div className="add-event-form-section">
+                <h2 className="add-event-title">Administrar Venues</h2>
+                <form className="add-event-form" onSubmit={handleVenueSubmit}>
+                  <div className="add-event-form-row">
+                    <label htmlFor="venue-id">ID del venue</label>
+                    <input
+                      id="venue-id"
+                      name="id"
+                      type="text"
+                      value={venueForm.id}
+                      onChange={handleVenueChange}
+                      placeholder="auditorio-centro"
+                    />
+                  </div>
+                  <div className="add-event-form-row">
+                    <label htmlFor="venue-name">Nombre del venue</label>
+                    <input
+                      id="venue-name"
+                      name="name"
+                      type="text"
+                      value={venueForm.name}
+                      onChange={handleVenueChange}
+                      placeholder="Auditorio Centro"
+                      required
+                    />
+                  </div>
+                  <div className="add-event-form-row">
+                    <label htmlFor="venue-type">Tipo</label>
+                    <input
+                      id="venue-type"
+                      name="type"
+                      type="text"
+                      value={venueForm.type}
+                      onChange={handleVenueChange}
+                      placeholder="Auditorio, Arena, Foro..."
+                    />
+                  </div>
+                  <div className="add-event-form-row">
+                    <label htmlFor="venue-capacity">Capacidad</label>
+                    <input
+                      id="venue-capacity"
+                      name="capacity"
+                      type="number"
+                      min="0"
+                      value={venueForm.capacity}
+                      onChange={handleVenueChange}
+                      placeholder="500"
+                    />
+                  </div>
+                  <div className="add-event-form-row">
+                    <label htmlFor="venue-zones">Zonas (separadas por coma)</label>
+                    <input
+                      id="venue-zones"
+                      name="zones"
+                      type="text"
+                      value={venueForm.zones}
+                      onChange={handleVenueChange}
+                      placeholder="VIP, General"
+                    />
+                  </div>
+                  <div className="add-event-form-row">
+                    <label htmlFor="venue-layout-type">Layout reutilizable</label>
+                    <select
+                      id="venue-layout-type"
+                      name="layoutType"
+                      value={venueForm.layoutType}
+                      onChange={handleVenueChange}
+                    >
+                      <option value="auditorio-itiz">Auditorio ITIZ</option>
+                      <option value="duela-itiz">Duela ITIZ</option>
+                      <option value="salon-51">Salón 51</option>
+                    </select>
+                  </div>
+
+                  {venueError && <div className="add-event-error">{venueError}</div>}
+
+                  <button className="add-event-btn add-event-btn-green" type="submit" disabled={venueLoading}>
+                    {venueLoading ? "Guardando..." : "Guardar venue"}
+                  </button>
+                  <button className="add-event-btn add-event-btn-gray" type="button" onClick={() => setAction("")}>Volver</button>
+                </form>
+
+                <div className="add-event-venues-list">
+                  {venues.map((venue) => (
+                    <div className="add-event-venue-item" key={venue.id}>
+                      <strong>{venue.name}</strong>
+                      <span>ID: {venue.id}</span>
+                      <span>Tipo: {venue.type || "Venue"}</span>
+                      <span>Layout: {venue.layoutType || venue.id}</span>
+                      <span>Zonas: {(venue.zones || []).join(", ") || "Sin zonas"}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -553,6 +747,8 @@ function AddEvent() {
                       handleChange={handleEditChange}
                       handleSubmit={handleEditSubmit}
                       loading={false}
+                      venues={venues}
+                      selectedVenue={selectedEditVenue}
                       success={editSuccess}
                       error={editError}
                       onCancel={() => setEditId(null)}

@@ -24,9 +24,12 @@ export default function EventForm(props) {
     success,
     error,
     onCancel,
+    venues = [],
+    selectedVenue,
   } = props;
 
   const isLaunch = !!form.isUpcomingLaunch;
+  const supportsVip = selectedVenue ? selectedVenue.layoutType !== "salon-51" : form.venueId !== "salon-51";
 
   return (
     <form className="add-event-form" onSubmit={handleSubmit}>
@@ -53,9 +56,13 @@ export default function EventForm(props) {
           value={form.venueId}
           onChange={handleChange}
         >
-          <option value="auditorio-itiz">Auditorio ITIZ</option>
-          <option value="salon-51">Salón 51</option>
-          <option value="duela-itiz">Duela ITIZ</option>
+          {venues.length === 0 ? (
+            <option value="">No hay venues registrados</option>
+          ) : (
+            venues.map((venue) => (
+              <option key={venue.id} value={venue.id}>{venue.name}</option>
+            ))
+          )}
         </select>
       </div>
 
@@ -128,6 +135,9 @@ export default function EventForm(props) {
                   <strong>VIP</strong>: acceso preferente o zona especial.
                 </span>
               )}
+              {selectedVenue && (
+                <span> Layout aplicado: <strong>{selectedVenue.layoutType}</strong>.</span>
+              )}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <input
@@ -138,7 +148,7 @@ export default function EventForm(props) {
                 onChange={handleChange}
                 placeholder="General"
               />
-              {form.venueId !== "salon-51" && (
+              {supportsVip && (
                 <input
                   name="ticketPricingVIP"
                   type="number"

@@ -4,8 +4,6 @@ import '../styles/HomePage.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { fetchEvents, getRandomEvents } from '../utils/fetchEvents.js';
-import banner1 from '../assets/banner1.png';
-import banner2 from '../assets/banner2.png';
 import ErrorBoundary from './ErrorBoundary.js';
 import Slider from 'react-slick';
 
@@ -14,6 +12,7 @@ const SliderComponent = Slider.default || Slider;
 
 const HomePage = () => {
   const [events, setEvents] = useState([]);
+  const [carouselEvents, setCarouselEvents] = useState([]);
 
   useEffect(() => {
     const loadRandomEvents = async () => {
@@ -21,7 +20,11 @@ const HomePage = () => {
         const fetchedEvents = await fetchEvents();
         if (Array.isArray(fetchedEvents)) {
           const randomEvents = getRandomEvents(fetchedEvents, 4);
+          const eventsWithImage = fetchedEvents.filter((event) => !!event.imageUrl);
+          const randomCarouselEvents = getRandomEvents(eventsWithImage, 3);
+
           setEvents(randomEvents);
+          setCarouselEvents(randomCarouselEvents);
         } else {
           console.error('Fetched events is not an array:', fetchedEvents);
         }
@@ -43,33 +46,41 @@ const HomePage = () => {
     autoplaySpeed: 3000, // Cambiar cada 3 segundos
   };
 
-  console.log('Carousel settings:', carouselSettings);
-  console.log('Slider component:', SliderComponent);
-
   return (
     <ErrorBoundary>
         <section className="homepage-carousel">
           <SliderComponent {...carouselSettings}>
-            <div className="carousel-slide">
-              <img src={banner1} alt="Mar Indigo" />
-              <div className="banner-content">
-                <h2>Mar Indigo</h2>
-                <p>Salón 51</p>
-                <Link to="/event/mar-indigo">
-                  <button className="homepage-button primary">Ver Boletos</button>
-                </Link>
+            {carouselEvents.length > 0 ? (
+              carouselEvents.map((event) => (
+                <div className="carousel-slide" key={event.id}>
+                  <div
+                    className="carousel-media"
+                    style={{
+                      backgroundImage: event.imageUrl
+                        ? `url(${event.imageUrl})`
+                        : 'linear-gradient(120deg, #0f172a, #1e293b)',
+                    }}
+                    role="img"
+                    aria-label={event.name || 'Evento'}
+                  />
+                  <div className="banner-content">
+                    <h2>{event.name || 'Evento'}</h2>
+                    <p>{event.venueId ? event.venueId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : 'Venue por definir'}</p>
+                    <Link to={`/event/${event.id}`}>
+                      <button className="homepage-button primary">Ver Boletos</button>
+                    </Link>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="carousel-slide">
+                <div className="carousel-media" style={{ backgroundImage: 'linear-gradient(120deg, #0f172a, #1e293b)' }} />
+                <div className="banner-content" style={{ position: 'static', margin: '40px' }}>
+                  <h2>Próximos Eventos</h2>
+                  <p>Estamos cargando los banners.</p>
+                </div>
               </div>
-            </div>
-            <div className="carousel-slide">
-              <img src={banner2} alt="SERBIA" />
-              <div className="banner-content">
-                <h2>SERBIA</h2>
-                <p>Auditorio ITIZ</p>
-                <Link to="/event/serbia">
-                  <button className="homepage-button primary">Ver Boletos</button>
-                </Link>
-              </div>
-            </div>
+            )}
           </SliderComponent>
         </section>
 

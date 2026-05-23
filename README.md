@@ -101,12 +101,14 @@ Variables recomendadas para pago:
 ```env
 REACT_APP_STRIPE_PUBLIC_KEY=
 REACT_APP_API_BASE=
+REACT_APP_BYPASS_PAYMENT_CODE=0
 ```
 
 Notas:
 
 - Si no defines `REACT_APP_STRIPE_PUBLIC_KEY`, el proyecto usa una llave de prueba por defecto en frontend.
 - Si no defines `REACT_APP_API_BASE`, se usa `https://fastpass-backend.vercel.app`.
+- Si `REACT_APP_BYPASS_PAYMENT_CODE=1`, se omite la verificación por código por correo y se continúa directo al popup de pago.
 
 ## Despliegue en Firebase Hosting
 

@@ -47,6 +47,8 @@
 
 /* Card */
 .resale-ticket-card {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;

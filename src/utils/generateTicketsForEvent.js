@@ -1,5 +1,5 @@
 import { db } from "../firebaseConfig.js";
-import { doc, writeBatch } from "firebase/firestore";
+import { doc, writeBatch, getDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 // Reglas de generación de boletos por venue
@@ -11,11 +11,21 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
   const user = auth.currentUser;
   console.log("[generateTicketsForEvent] Usuario autenticado:", user ? user.email : null, user ? user.uid : null);
 
+  let layoutType = venueId;
+  if (!["auditorio-itiz", "duela-itiz", "salon-51"].includes(venueId)) {
+    const venueSnap = await getDoc(doc(db, "venues", venueId));
+    if (!venueSnap.exists()) {
+      throw new Error("Venue no encontrado para generar boletos");
+    }
+    layoutType = venueSnap.data().layoutType || venueId;
+  }
+
   // Prefijos por venue
   let venuePrefix = "GEN";
   if (venueId === "auditorio-itiz") venuePrefix = "AUIT";
   else if (venueId === "duela-itiz") venuePrefix = "DUIT";
   else if (venueId === "salon-51") venuePrefix = "S51";
+  else venuePrefix = venueId.replace(/[^a-zA-Z0-9]/g, "").substring(0, 4).toUpperCase().padEnd(4, "X");
 
   // Usar los primeros 4 caracteres del eventId como sufijo identificador
   const eventSuffix = (eventId || "EVNT").replace(/[^a-zA-Z0-9]/g, "").substring(0, 4).toUpperCase().padEnd(4, "-");
@@ -41,7 +51,7 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
 
   let tickets = [];
 
-  if (venueId === "salon-51") {
+  if (layoutType === "salon-51") {
     // 300 boletos generales
     for (let i = 1; i <= 300; i++) {
       const seat = String(i).padStart(3, "0");
@@ -60,7 +70,7 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
       tickets.push({ id, ticketData });
     }
     await batchWriteTickets(tickets);
-  } else if (venueId === "duela-itiz") {
+  } else if (layoutType === "duela-itiz") {
     // 50 VIP, 200 generales
     for (let i = 1; i <= 250; i++) {
       const isVIP = i <= 50;
@@ -80,7 +90,7 @@ export async function generateTicketsForEvent({ eventId, venueId, pricing, forRe
       tickets.push({ id, ticketData });
     }
     await batchWriteTickets(tickets);
-  } else if (venueId === "auditorio-itiz") {
+  } else if (layoutType === "auditorio-itiz") {
     // Zonas y filas según tu lógica
     const zones = {
       A: [5, 5, 5, 5, 6, 6],
