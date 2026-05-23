@@ -1,180 +1,209 @@
-# 🎫 FastPass - Plataforma de Venta y Reventa de Boletos
+# FastPass
 
-FastPass es una plataforma digital para la compra y reventa de boletos para eventos sociales. Los usuarios pueden adquirir boletos para distintos eventos y, si ya no los necesitan, venderlos a otros usuarios al precio que deseen.
+Plataforma web para compra, gestión y reventa de boletos de eventos, con autenticación, checkout con Stripe, validación por QR y panel de usuario.
 
----
+Actualizado: mayo 2026.
 
-## 🚀 Desplegar en Firebase Hosting
+## Resumen
 
-Sigue estos pasos para desplegar tu aplicación en Firebase Hosting:
+FastPass permite:
 
-### 1. Instalar Firebase CLI
-Si no tienes Firebase CLI instalado, hazlo globalmente con:
-```bash
-npm install -g firebase-tools
-```
+- Explorar eventos por venue.
+- Comprar boletos por zona/asiento.
+- Completar pago con Stripe Checkout.
+- Consultar boletos comprados desde la cuenta del usuario.
+- Publicar o retirar boletos de reventa (con verificación GeeTest).
+- Visualizar boleto con QR para validación de acceso.
+- Validar boletos en ruta de acceso para staff.
+- Ajustar opciones de accesibilidad (contraste, tipografia, tamano, modo nocturno, escala de grises, guia de lectura).
 
-### 2. Iniciar sesión en Firebase
-Abre la terminal e inicia sesión:
-```bash
-firebase login
-```
+## Novedades incluidas
 
-### 3. Configurar Firebase Hosting
-Inicializa Firebase Hosting en tu proyecto:
-```bash
-firebase init hosting
-```
-- Selecciona tu proyecto de Firebase.
-- Define `build` como el directorio público.
-- Responde "No" cuando se te pregunte si es una SPA (React Router manejará el enrutamiento).
+- Flujo de pago con redireccion a Stripe y pantalla de confirmacion de compra.
+- Asignacion de boletos posterior al pago usando `fastpass_pending_purchase` en `localStorage`.
+- Reventa desde cuenta de usuario con validacion de captcha GeeTest y listado publico en la seccion de reventa.
+- Modal de boleto con QR y ruta de validacion `/validate/:eventId/:ticketId`.
+- Ruta protegida para cuenta (`/account`) y administracion de eventos (`/add-event`).
+- Panel de accesibilidad flotante con persistencia en `localStorage`.
+- Utilidades de datos para importar eventos/venues, generar boletos, eliminar boletos y validar integridad en Firestore.
 
-### 4. Construir la aplicación
-Genera los archivos optimizados para producción:
-```bash
-npm run build
-```
+## Stack tecnico
 
-### 5. Desplegar la aplicación
-Sube tu aplicación a Firebase Hosting:
-```bash
-firebase deploy
-```
+- Frontend: React 19 + react-scripts 5.
+- Routing: react-router-dom 5.
+- Backend/BaaS: Firebase (Auth + Firestore + Hosting).
+- Pago: Stripe Checkout (`@stripe/stripe-js`) con backend externo para crear sesion.
+- Seguridad bot/captcha: GeeTest (`react-geetest-v4`) + verificacion en backend.
+- Extras: generacion de QR (`qrcode.react`), date-fns.
 
-Tu aplicación estará disponible en la URL proporcionada por Firebase Hosting. 🎉
+## Rutas principales
 
-### 6. Construir la aplicación en el host de Firebase
-Si deseas construir la aplicación directamente en el host de Firebase, puedes usar el siguiente comando después de haber configurado Firebase Hosting:
+- `/` Inicio
+- `/events` Catalogo de eventos
+- `/event/:eventId` Detalle y compra
+- `/resale` Boletos en reventa
+- `/login` Inicio de sesion
+- `/account` Cuenta del usuario (protegida)
+- `/add-event` Administracion de eventos (protegida)
+- `/validate/:eventId/:ticketId` Validacion de boleto
+- `/payment-success` Confirmacion y asignacion de compra
 
-```bash
-firebase build
-```
+## Requisitos
 
-Esto generará los archivos optimizados para producción y los colocará en el directorio configurado como público (`build` por defecto).
+- Node.js 18+ recomendado
+- npm 9+ recomendado
+- Proyecto Firebase con Authentication y Firestore habilitados
 
----
+## Instalacion y ejecucion local
 
-## 🚀 Características Principales
+1. Instalar dependencias:
 
-- 🔑 **Inicio de sesión con Google**
-- 🎭 **Compra de boletos** (Máximo 4 por usuario por evento)
-- 💳 **Simulación de pasarela de pagos**
-- 🔄 **Reventa de boletos** (Los usuarios pueden poner sus boletos en venta)
-- 📍 **Eventos en diferentes venues** (Por ahora, 3 venues y 2 conciertos por cada uno)
-
----
-
-## 📌 Tecnologías Utilizadas
-
-- **Frontend:** React.js con React Router
-- **Autenticación:** Firebase Authentication
-- **Base de Datos:** Firebase (simulada por ahora)
-- **Estado Global:** Context API (o Redux en el futuro)
-
----
-
-## 📦 Instalación y Configuración
-
-### 1. Clonar el repositorio
-Si no tienes el repositorio, clónalo con:
-```bash
-git clone https://github.com/ItielSanzAXO/fastpass.git
-cd fastpass
-```
-
-Si ya tienes el repositorio, actualízalo con:
-```bash
-git pull origin main
-```
-
-### 2. Instalar dependencias
 ```bash
 npm install
 ```
 
-### 3. Configurar las variables de entorno
-Copia el archivo `.env.example` y renómalo como `.env`:
+2. Crear archivo de entorno:
+
 ```bash
-cp .env.example .env
+copy .env.example .env
 ```
 
-Luego, completa las variables en el archivo `.env` con las claves de Firebase proporcionadas.
+3. Configurar variables de entorno en `.env`.
 
-**Nota:** Si Firebase genera un archivo de configuración `firebaseConfig`, asegúrate de colocarlo en `src/firebaseConfig.js` y exportarlo como un objeto. Por ejemplo:
-```javascript
-// src/firebaseConfig.js
-const firebaseConfig = {
-  apiKey: "tu-api-key",
-  authDomain: "tu-auth-domain",
-  projectId: "tu-project-id",
-  storageBucket: "tu-storage-bucket",
-  messagingSenderId: "tu-messaging-sender-id",
-  appId: "tu-app-id"
-};
+4. Levantar en desarrollo:
 
-export default firebaseConfig;
-```
-
-### 4. Ejecutar el proyecto
-Para desarrollo:
 ```bash
 npm start
 ```
 
-Para construir la aplicación para producción:
+5. Build de produccion:
+
 ```bash
 npm run build
 ```
 
----
+## Variables de entorno
 
-## 📂 Estructura del Proyecto
+Variables obligatorias (Firebase):
 
-```plaintext
-fastpass/
-│-- src/
-│   ├── components/
-│   │   ├── HomePage.js
-│   │   ├── LoginPage.js
-│   │   ├── TicketPurchase.js
-│   │   ├── TicketResale.js
-│   ├── App.js
-│   ├── firebaseConfig.js
-│   ├── index.js
-│-- public/
-│-- package.json
-│-- README.md
+```env
+REACT_APP_FIREBASE_API_KEY=
+REACT_APP_FIREBASE_AUTH_DOMAIN=
+REACT_APP_FIREBASE_PROJECT_ID=
+REACT_APP_FIREBASE_STORAGE_BUCKET=
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=
+REACT_APP_FIREBASE_APP_ID=
+REACT_APP_FIREBASE_MEASUREMENT_ID=
 ```
 
----
+Variables recomendadas para pago:
 
-## 🤝 Contribuciones
+```env
+REACT_APP_STRIPE_PUBLIC_KEY=
+REACT_APP_API_BASE=
+```
 
-¡Toda contribución es bienvenida! Para contribuir:
+Notas:
 
-1. Realiza un fork del repositorio.
-2. Crea una rama con tu funcionalidad:
+- Si no defines `REACT_APP_STRIPE_PUBLIC_KEY`, el proyecto usa una llave de prueba por defecto en frontend.
+- Si no defines `REACT_APP_API_BASE`, se usa `https://fastpass-backend.vercel.app`.
 
-    ```bash
-    git checkout -b feature-nueva
-    ```
+## Despliegue en Firebase Hosting
 
-3. Realiza commits y sube los cambios:
+1. Instalar Firebase CLI (si aun no la tienes):
 
-    ```bash
-    git commit -m "Agregada nueva funcionalidad"
-    ```
+```bash
+npm install -g firebase-tools
+```
 
-4. Envía un Pull Request 🚀
+2. Login en Firebase:
 
----
+```bash
+firebase login
+```
 
-## 📜 Licencia
+3. Compilar app:
 
-Este proyecto está bajo la licencia **MIT**. Puedes usarlo y modificarlo libremente.
+```bash
+npm run build
+```
 
----
+4. Desplegar:
 
-## 📧 Contacto
+```bash
+firebase deploy
+```
 
-Si tienes dudas o sugerencias, puedes enviarme un mensaje a [tu email o perfil de GitHub].
+Configuracion actual de hosting:
+
+- Directorio publico: `build`
+- Rewrite SPA activo hacia `index.html`
+- Headers COOP/COEP configurados en `firebase.json`
+
+## Scripts y utilidades de datos
+
+Este proyecto incluye utilidades para poblar y mantener Firestore.
+
+Ejecuta desde la raiz del proyecto:
+
+```bash
+node src/utils/importData.js
+```
+
+Utilidades destacadas:
+
+- `src/utils/importData.js`: crea venues y eventos base.
+- `src/utils/generateTicketsForEvent.js`: genera boletos por venue con reglas de asientos/zonas.
+- `src/utils/deleteTicketsForEvent.js`: elimina boletos por `eventId`.
+- `src/utils/validateFirestoreData.js`: revisa integridad minima de eventos y boletos.
+
+## Estructura actual (resumen)
+
+```text
+src/
+  components/
+    venues/
+    AddEvent.js
+    EventDetail.js
+    EventsPage.js
+    FloatingAccessibilityButton.js
+    LoginPage.js
+    ProtectedRoute.js
+    ResalePage.js
+    TicketModal.js
+    UserAccountPage.js
+  context/
+    AuthContext.js
+  pages/
+    PaymentSuccessPage.js
+    ValidateTicketPage.js
+  utils/
+    importData.js
+    generateTicketsForEvent.js
+    deleteTicketsForEvent.js
+    validateFirestoreData.js
+    readingGuide.js
+```
+
+## Consideraciones importantes
+
+- La creacion de sesion de Stripe y la verificacion de GeeTest dependen de un backend externo.
+- El flujo de compra post-pago usa datos temporales en `localStorage`; no limpiarlo manualmente durante checkout.
+- Para que la validacion QR funcione correctamente en produccion, verificar dominio final en las URLs de boleto.
+
+## Contribucion
+
+1. Crear rama de trabajo:
+
+```bash
+git checkout -b feature/mi-cambio
+```
+
+2. Realizar cambios y pruebas locales.
+
+3. Abrir Pull Request con descripcion clara de:
+
+- problema
+- solucion
+- impacto
+- pasos de prueba
